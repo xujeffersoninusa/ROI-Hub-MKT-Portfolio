@@ -236,9 +236,11 @@ const CONFIG = (function(){
   const s = JSON.parse(localStorage.getItem('roiPortfolioConfig')||'{}');
   const a = JSON.parse(localStorage.getItem('roiStudioConfig')||'{}');
   const b = JSON.parse(localStorage.getItem('agentStudioConfig')||'{}');
+  function stripSlash(u){return u?u.replace(/\/+$/,''):'';}
+  function validSbKey(k){return (k&&!k.startsWith('ghp_')&&!k.startsWith('github_pat_'))?k:'';}
   return {
-    supabaseUrl:     s.supabaseUrl     || a.supabaseUrl     || b.supabaseUrl     || '',
-    supabaseAnonKey: s.supabaseAnonKey || a.supabaseAnonKey || b.supabaseAnonKey || '',
+    supabaseUrl:     stripSlash(s.supabaseUrl     || a.supabaseUrl     || b.supabaseUrl     || ''),
+    supabaseAnonKey: validSbKey(s.supabaseAnonKey) || validSbKey(a.supabaseAnonKey) || validSbKey(b.supabaseAnonKey) || '',
   };
 })();
 
@@ -256,15 +258,18 @@ let filteredHubs = [];
 
 // ── Settings ──
 function openSettings(){
-  document.getElementById('cfgSbUrl').value = CONFIG.supabaseUrl||'';
+  document.getElementById('cfgSbUrl').value = (CONFIG.supabaseUrl||'').replace(/\/+$/,'');
   document.getElementById('cfgSbKey').value = CONFIG.supabaseAnonKey||'';
   document.getElementById('settingsModal').classList.add('show');
 }
 function closeSettings(){document.getElementById('settingsModal').classList.remove('show');}
 function saveSettings(){
+  const sbUrl = document.getElementById('cfgSbUrl').value.trim().replace(/\/+$/,'');
+  const sbKey = document.getElementById('cfgSbKey').value.trim();
+  if(sbKey&&(sbKey.startsWith('ghp_')||sbKey.startsWith('github_pat_'))){toast('Error: That looks like a GitHub token, not a Supabase Anon Key. Keys start with eyJ...','error');return;}
   const updated = {
-    supabaseUrl: document.getElementById('cfgSbUrl').value.trim(),
-    supabaseAnonKey: document.getElementById('cfgSbKey').value.trim()
+    supabaseUrl: sbUrl,
+    supabaseAnonKey: sbKey
   };
   localStorage.setItem('roiPortfolioConfig', JSON.stringify(updated));
   Object.assign(CONFIG, updated);
@@ -272,9 +277,13 @@ function saveSettings(){
   refreshAll();
 }
 async function testConnection(){
+  var u=(document.getElementById('cfgSbUrl')?document.getElementById('cfgSbUrl').value.trim():CONFIG.supabaseUrl||'').replace(/\/+$/,'');
+  var k=document.getElementById('cfgSbKey')?document.getElementById('cfgSbKey').value.trim():CONFIG.supabaseAnonKey||'';
+  if(!u||!k){toast('Enter Supabase URL and Anon Key','error');return;}
+  if(k.startsWith('ghp_')||k.startsWith('github_pat_')){toast('Error: That is a GitHub token, not a Supabase key','error');return;}
   try{
-    const r=await fetch(CONFIG.supabaseUrl+'/rest/v1/?apikey='+CONFIG.supabaseAnonKey,{
-      headers:{'apikey':CONFIG.supabaseAnonKey,'Authorization':'Bearer '+CONFIG.supabaseAnonKey}
+    const r=await fetch(u+'/rest/v1/roi_hub_registry?select=count',{
+      headers:{'apikey':k,'Authorization':'Bearer '+k}
     });
     if(r.ok) toast('Connected ✓','success'); else toast('Failed: HTTP '+r.status,'error');
   }catch(e){toast('Error: '+e.message,'error');}
