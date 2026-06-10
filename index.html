@@ -328,7 +328,6 @@ async function refreshAll(){
           if(!allHubs.find(a=>a.hub_id===h.hub_id)){
             allHubs.push(h);
           } else {
-            // Merge remote data into local
             const idx = allHubs.findIndex(a=>a.hub_id===h.hub_id);
             allHubs[idx] = {...allHubs[idx], ...h};
           }
@@ -340,7 +339,87 @@ async function refreshAll(){
   // Filter out archived
   allHubs = allHubs.filter(h => h.status !== 'archived');
 
-  // Assign ROI status if not set (simulate based on available data)
+  // ── FIX #7: Fetch financial KPIs from each hub's data table ──
+  for(let i=0; i<allHubs.length; i++){
+    const h = allHubs[i];
+    // First check if metadata has pre-computed KPIs
+    if(h.metadata){
+      let meta = h.metadata;
+      if(typeof meta === 'string'){ try{ meta = JSON.parse(meta); }catch(e){} }
+      if(meta && meta.npv != null) h.npv = meta.npv;
+      if(meta && meta.irr != null) h.irr = meta.irr;
+      if(meta && meta.dev_cost != null) h.dev_cost = meta.dev_cost;
+      if(meta && meta.total_dev != null) h.dev_cost = meta.total_dev;
+    }
+    // If still no KPIs and we have a db_table, fetch from hub data
+    if(h.npv == null && h.db_table && CONFIG.supabaseUrl && CONFIG.supabaseAnonKey){
+      try{
+        const headers = {'apikey':CONFIG.supabaseAnonKey,'Authorization':'Bearer '+CONFIG.supabaseAnonKey};
+        const r = await fetch(CONFIG.supabaseUrl+'/rest/v1/'+h.db_table+'?select=*&order=updated_at.desc&limit=1',{headers});
+        if(r.ok){
+          const rows = await r.json();
+          if(rows.length > 0){
+            const row = rows[0];
+            const devCosts = typeof row.dev_costs === 'string' ? JSON.parse(row.dev_costs||'{}') : (row.dev_costs||{});
+            const revenue  = typeof row.revenue === 'string' ? JSON.parse(row.revenue||'{}') : (row.revenue||{});
+            const params   = typeof row.params === 'string' ? JSON.parse(row.params||'{}') : (row.params||{});
+            const wacc = (params.wacc||12)/100;
+            const burden = (params.burden||30)/100;
+
+            // Compute total dev cost
+            let totalDev = 0;
+            const N = 10;
+            const devArr = new Array(N).fill(0);
+            if(devCosts && typeof devCosts === 'object'){
+              Object.keys(devCosts).forEach(cat => {
+                const arr = devCosts[cat];
+                if(Array.isArray(arr)){
+                  for(let y=0; y<N; y++) devArr[y] += (arr[y]||0);
+                }
+              });
+              totalDev = devArr.reduce((a,b)=>a+b, 0);
+            }
+
+            // Compute revenue from mid scenario
+            let revArr = new Array(N).fill(0);
+            let cogsArr = new Array(N).fill(0);
+            if(revenue.mid){
+              const mid = revenue.mid;
+              for(let y=0; y<N; y++){
+                const u = (mid.units&&mid.units[y])||0;
+                const a = (mid.asp&&mid.asp[y])||0;
+                const c = (mid.cogs&&mid.cogs[y])||0;
+                revArr[y] = u * a;
+                cogsArr[y] = u * c;
+              }
+            }
+
+            // Simple P&L: PBIT = Revenue - COGS - Dev
+            const pbit = revArr.map((r,y) => r - cogsArr[y] - devArr[y]);
+            const npv = pbit.reduce((s,v,y) => s + v/Math.pow(1+wacc,y), 0);
+
+            // IRR via bisection
+            function calcIRR(cf){
+              let lo=-0.5, hi=5.0;
+              for(let it=0;it<100;it++){
+                const mid2=(lo+hi)/2;
+                const npv2=cf.reduce((s,v,i)=>s+v/Math.pow(1+mid2,i),0);
+                if(npv2>0) lo=mid2; else hi=mid2;
+              }
+              return (lo+hi)/2;
+            }
+            const irr = calcIRR(pbit);
+
+            h.npv = Math.round(npv);
+            h.irr = irr;
+            h.dev_cost = Math.round(totalDev);
+          }
+        }
+      }catch(e){console.warn('Failed to fetch hub data for '+h.hub_id+':',e);}
+    }
+  }
+
+  // Assign ROI status based on financial data
   allHubs.forEach(h => {
     if(h.npv !== undefined && h.npv !== null && h.irr !== undefined && h.irr !== null){
       if(h.npv > 0 && h.irr > 0.12) h.roi_status = 'go';
