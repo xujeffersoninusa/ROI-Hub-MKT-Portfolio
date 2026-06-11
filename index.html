@@ -5,7 +5,6 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>ROI Portfolio Dashboard — Teradyne ROI Hub OS</title>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
 <style>
 /* ── Reset & Base ────────────────────────────────────── */
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
@@ -46,8 +45,6 @@ a{color:var(--accent);text-decoration:none}a:hover{text-decoration:underline}
 .btn-accent:hover{background:var(--accent-hover);transform:translateY(-1px)}
 .btn-ghost{background:transparent;color:var(--text-secondary);border:1px solid var(--border)}
 .btn-ghost:hover{border-color:var(--accent);color:var(--accent)}
-.btn-icon{padding:8px;border-radius:8px;background:transparent;border:1px solid var(--border);cursor:pointer;color:var(--text-secondary);font-size:1.1rem;transition:var(--transition)}
-.btn-icon:hover{border-color:var(--accent);color:var(--accent)}
 
 /* ── Layout ──────────────────────────────────────────── */
 .app-wrapper{display:flex;flex:1;overflow:hidden}
@@ -68,6 +65,14 @@ a{color:var(--accent);text-decoration:none}a:hover{text-decoration:underline}
   background:var(--bg-primary);color:var(--text-primary);font-size:.85rem;
 }
 .config-form input::placeholder{color:var(--text-muted)}
+
+/* ── Debug Banner ────────────────────────────────────── */
+.debug-banner{
+  background:#1a2e1a;border:1px solid var(--green);border-radius:var(--radius);
+  padding:14px 20px;margin-bottom:20px;font-family:monospace;font-size:.75rem;
+  color:var(--green);max-height:200px;overflow-y:auto;display:none;white-space:pre-wrap;
+}
+.debug-banner.visible{display:block}
 
 /* ── Scenario Tabs ───────────────────────────────────── */
 .controls-row{display:flex;align-items:center;justify-content:space-between;margin-bottom:24px;flex-wrap:wrap;gap:12px}
@@ -225,13 +230,14 @@ a{color:var(--accent);text-decoration:none}a:hover{text-decoration:underline}
 </head>
 <body>
 
-<!-- ═══════════════ HEADER ═══════════════ -->
+<!-- HEADER -->
 <header class="header">
   <div class="header-left">
     <div class="logo">Teradyne<span> ROI Hub OS</span></div>
     <div class="header-title">Portfolio Dashboard</div>
   </div>
   <div class="header-right">
+    <button class="btn btn-ghost" onclick="toggleDebug()">&#x1F41E; Debug</button>
     <button class="btn btn-ghost" id="refreshBtn" onclick="loadPortfolio()" title="Refresh data">
       &#x21bb; Refresh
     </button>
@@ -241,7 +247,7 @@ a{color:var(--accent);text-decoration:none}a:hover{text-decoration:underline}
   </div>
 </header>
 
-<!-- ═══════════════ MAIN ═══════════════ -->
+<!-- MAIN -->
 <div class="app-wrapper">
   <div class="main-content" id="mainContent">
 
@@ -255,6 +261,9 @@ a{color:var(--accent);text-decoration:none}a:hover{text-decoration:underline}
         <button class="btn btn-accent" onclick="saveConfig()">Connect</button>
       </div>
     </div>
+
+    <!-- Debug Banner -->
+    <div class="debug-banner" id="debugBanner"></div>
 
     <!-- Error Container -->
     <div id="errorContainer"></div>
@@ -281,9 +290,7 @@ a{color:var(--accent);text-decoration:none}a:hover{text-decoration:underline}
     </div>
 
     <!-- Top-Level KPI Cards -->
-    <div class="kpi-grid" id="portfolioKPIs">
-      <!-- Filled by JS -->
-    </div>
+    <div class="kpi-grid" id="portfolioKPIs"></div>
 
     <!-- Hub Section -->
     <div class="section-header">
@@ -302,7 +309,7 @@ a{color:var(--accent);text-decoration:none}a:hover{text-decoration:underline}
 
   </div>
 
-  <!-- ═══════════════ AI PANEL ═══════════════ -->
+  <!-- AI PANEL -->
   <div class="ai-panel" id="aiPanel">
     <div class="ai-header">
       <h3><span class="dot"></span> Portfolio AI</h3>
@@ -320,94 +327,255 @@ a{color:var(--accent);text-decoration:none}a:hover{text-decoration:underline}
   </div>
 </div>
 
-<!-- ═══════════════ FOOTER ═══════════════ -->
+<!-- FOOTER -->
 <footer class="footer">
-  Teradyne ROI Hub OS &copy; 2026 &nbsp;|&nbsp; Portfolio Dashboard v1.0 &nbsp;|&nbsp; Data powered by Supabase
+  Teradyne ROI Hub OS &copy; 2026 &nbsp;|&nbsp; Portfolio Dashboard v1.1 &nbsp;|&nbsp; Data powered by Supabase
 </footer>
 
-<!-- ═══════════════ JAVASCRIPT ═══════════════ -->
+<!-- JAVASCRIPT -->
 <script>
 // ── Global State ────────────────────────────────────────
 let supabaseClient = null;
 let hubRegistry = [];
-let hubSnapshots = {};       // { hub_key: { low: {...}, most_likely: {...}, high: {...} } }
+let hubSnapshots = {};
+let hubMeta = {};
 let currentScenario = 'most_likely';
+let debugLog = [];
+let hasScenarioColumn = {};
+
+// ── Debug Logging ───────────────────────────────────────
+function dbg(msg) {
+  const ts = new Date().toLocaleTimeString();
+  const line = '[' + ts + '] ' + msg;
+  console.log(line);
+  debugLog.push(line);
+  const el = document.getElementById('debugBanner');
+  if (el) el.textContent = debugLog.join('\n');
+}
+
+function toggleDebug() {
+  const el = document.getElementById('debugBanner');
+  el.classList.toggle('visible');
+}
 
 // ── Initialize ──────────────────────────────────────────
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener('DOMContentLoaded', function() {
   initSupabase();
 });
 
 function initSupabase() {
-  const config = JSON.parse(localStorage.getItem('roiStudioConfig') || 'null');
+  var raw = localStorage.getItem('roiStudioConfig');
+  var config = null;
+  try { config = JSON.parse(raw); } catch(e) {}
   if (!config || !config.supabaseUrl || !config.supabaseAnonKey) {
     document.getElementById('configBanner').classList.add('visible');
     showEmptyState('Configure Supabase connection above to load portfolio data.');
+    dbg('No Supabase config found in localStorage key "roiStudioConfig"');
     return;
   }
   try {
     supabaseClient = supabase.createClient(config.supabaseUrl, config.supabaseAnonKey);
     document.getElementById('configBanner').classList.remove('visible');
+    dbg('Supabase client initialized: ' + config.supabaseUrl);
     loadPortfolio();
   } catch (e) {
     showError('Failed to initialize Supabase client: ' + e.message);
+    dbg('ERROR initializing Supabase: ' + e.message);
   }
 }
 
 function saveConfig() {
-  const url = document.getElementById('cfgUrl').value.trim();
-  const key = document.getElementById('cfgKey').value.trim();
+  var url = document.getElementById('cfgUrl').value.trim();
+  var key = document.getElementById('cfgKey').value.trim();
   if (!url || !key) { alert('Please fill in both fields.'); return; }
   localStorage.setItem('roiStudioConfig', JSON.stringify({ supabaseUrl: url, supabaseAnonKey: key }));
   initSupabase();
 }
+
+// ── Smart Column Resolution ─────────────────────────────
+function resolveColumn(row, candidates, fallback) {
+  if (!row) return fallback;
+  for (var i = 0; i < candidates.length; i++) {
+    if (row[candidates[i]] !== undefined && row[candidates[i]] !== null) return candidates[i];
+  }
+  return fallback;
+}
+
+function getVal(row, candidates, defaultVal) {
+  if (!row) return defaultVal;
+  for (var i = 0; i < candidates.length; i++) {
+    if (row[candidates[i]] !== undefined && row[candidates[i]] !== null) {
+      var v = parseFloat(row[candidates[i]]);
+      return isNaN(v) ? defaultVal : v;
+    }
+  }
+  return defaultVal;
+}
+
+function deriveTableKey(name) {
+  return name
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, '_')
+    .replace(/^_+|_+$/g, '')
+    .replace(/_+/g, '_');
+}
+
+// Column name candidates
+var NPV_COLS = ['npv', 'net_present_value', 'NPV', 'Net_Present_Value'];
+var IRR_COLS = ['irr', 'internal_rate_of_return', 'IRR', 'Internal_Rate_of_Return'];
+var DEV_COLS = ['total_dev_cost', 'dev_cost', 'total_development_cost', 'eng_total', 'total_nre', 'nre_cost', 'development_cost', 'total_engineering_cost'];
+var REV_COLS = ['total_revenue', 'revenue', 'annual_revenue', 'cumulative_revenue', 'total_rev'];
 
 // ── Data Loading ────────────────────────────────────────
 async function loadPortfolio() {
   if (!supabaseClient) { initSupabase(); return; }
   showLoading();
   clearError();
+  debugLog = [];
+  dbg('=== Loading Portfolio ===');
+
   try {
     // 1. Fetch hub registry
-    const { data: hubs, error: hubErr } = await supabaseClient
+    var result = await supabaseClient
       .from('roi_hub_registry')
       .select('*')
       .order('created_at', { ascending: true });
-    if (hubErr) throw hubErr;
-    hubRegistry = hubs || [];
 
-    // 2. For each hub, fetch latest snapshots for all 3 scenarios
+    if (result.error) throw result.error;
+    hubRegistry = result.data || [];
+
+    dbg('Registry rows: ' + hubRegistry.length);
+    if (hubRegistry.length > 0) {
+      var firstRow = hubRegistry[0];
+      var cols = Object.keys(firstRow);
+      dbg('Columns found: ' + cols.join(', '));
+      dbg('First row data: ' + JSON.stringify(firstRow, null, 2));
+    }
+
+    // 2. Resolve key/name/url columns
+    hubMeta = {};
     hubSnapshots = {};
-    const scenarios = ['low', 'most_likely', 'high'];
-    for (const hub of hubRegistry) {
-      const tableName = hub.hub_key + '_roi';
-      hubSnapshots[hub.hub_key] = {};
-      for (const sc of scenarios) {
+    hasScenarioColumn = {};
+
+    var keyColCandidates = ['hub_key', 'table_name', 'table_prefix', 'product_key', 'key', 'slug', 'product_code'];
+    var nameColCandidates = ['hub_name', 'product_name', 'name', 'title', 'display_name', 'hub_title'];
+    var urlColCandidates = ['hub_url', 'url', 'link', 'product_url', 'dashboard_url'];
+
+    var keyCol = null;
+    var nameCol = null;
+    var urlCol = null;
+
+    if (hubRegistry.length > 0) {
+      keyCol = resolveColumn(hubRegistry[0], keyColCandidates, null);
+      nameCol = resolveColumn(hubRegistry[0], nameColCandidates, null);
+      urlCol = resolveColumn(hubRegistry[0], urlColCandidates, null);
+      dbg('Resolved columns -> key: "' + keyCol + '", name: "' + nameCol + '", url: "' + urlCol + '"');
+    }
+
+    // 3. For each hub, resolve meta and fetch snapshots
+    var scenarios = ['low', 'most_likely', 'high'];
+    for (var h = 0; h < hubRegistry.length; h++) {
+      var hub = hubRegistry[h];
+
+      // Resolve the hub key (for table name)
+      var hubKey = null;
+      if (keyCol && hub[keyCol]) {
+        hubKey = hub[keyCol];
+      } else if (nameCol && hub[nameCol]) {
+        hubKey = deriveTableKey(hub[nameCol]);
+      } else {
+        var fallbackName = hub.hub_name || hub.product_name || hub.name || hub.title || hub.id;
+        hubKey = fallbackName ? deriveTableKey(String(fallbackName)) : null;
+      }
+
+      if (!hubKey) {
+        dbg('SKIP: Could not resolve key for hub: ' + JSON.stringify(hub));
+        continue;
+      }
+
+      var hubName = (nameCol && hub[nameCol]) ? hub[nameCol] : hubKey;
+      var hubUrl = (urlCol && hub[urlCol]) ? hub[urlCol] : '#';
+      var tableName = hubKey.endsWith('_roi') ? hubKey : hubKey + '_roi';
+
+      hubMeta[hubKey] = { name: hubName, url: hubUrl, key: hubKey, tableName: tableName, raw: hub };
+      hubSnapshots[hubKey] = {};
+
+      dbg('Hub: "' + hubName + '" -> table: "' + tableName + '"');
+
+      // Try fetching data for each scenario
+      for (var s = 0; s < scenarios.length; s++) {
+        var sc = scenarios[s];
         try {
-          const { data: rows, error: snapErr } = await supabaseClient
+          // First attempt: with scenario filter
+          var snapResult = await supabaseClient
             .from(tableName)
             .select('*')
             .eq('scenario', sc)
             .order('created_at', { ascending: false })
             .limit(1);
-          if (snapErr) {
-            console.warn(`Could not fetch ${tableName} / ${sc}:`, snapErr.message);
-            hubSnapshots[hub.hub_key][sc] = null;
+
+          if (snapResult.error) {
+            dbg('  [' + sc + '] ERROR from "' + tableName + '": ' + snapResult.error.message);
+            hubSnapshots[hubKey][sc] = null;
+
+            // If table doesn't exist, skip remaining scenarios
+            if (snapResult.error.message.indexOf('could not find') >= 0 ||
+                snapResult.error.message.indexOf('Could not find') >= 0 ||
+                snapResult.error.message.indexOf('does not exist') >= 0) {
+              dbg('  Table "' + tableName + '" does not exist, skipping remaining scenarios');
+              hubSnapshots[hubKey]['low'] = null;
+              hubSnapshots[hubKey]['most_likely'] = null;
+              hubSnapshots[hubKey]['high'] = null;
+              break;
+            }
+            continue;
+          }
+
+          var rows = snapResult.data;
+          if (rows && rows.length > 0) {
+            hubSnapshots[hubKey][sc] = rows[0];
+            hasScenarioColumn[tableName] = true;
+            dbg('  [' + sc + '] Found data. Columns: ' + Object.keys(rows[0]).join(', '));
           } else {
-            hubSnapshots[hub.hub_key][sc] = (rows && rows.length > 0) ? rows[0] : null;
+            // No rows with scenario filter — maybe there's no scenario column
+            if (hasScenarioColumn[tableName] === undefined) {
+              dbg('  [' + sc + '] No rows with scenario filter. Trying without...');
+              var allResult = await supabaseClient
+                .from(tableName)
+                .select('*')
+                .order('created_at', { ascending: false })
+                .limit(1);
+
+              if (!allResult.error && allResult.data && allResult.data.length > 0) {
+                dbg('  Found data WITHOUT scenario filter. Columns: ' + Object.keys(allResult.data[0]).join(', '));
+                hasScenarioColumn[tableName] = false;
+                // Use same data for all scenarios
+                hubSnapshots[hubKey]['low'] = allResult.data[0];
+                hubSnapshots[hubKey]['most_likely'] = allResult.data[0];
+                hubSnapshots[hubKey]['high'] = allResult.data[0];
+                break; // No need to query more scenarios
+              } else {
+                dbg('  No rows at all in "' + tableName + '"');
+                hubSnapshots[hubKey][sc] = null;
+              }
+            } else {
+              hubSnapshots[hubKey][sc] = null;
+            }
           }
         } catch (e) {
-          console.warn(`Error fetching ${tableName} / ${sc}:`, e);
-          hubSnapshots[hub.hub_key][sc] = null;
+          dbg('  [' + sc + '] Exception: ' + (e.message || e));
+          hubSnapshots[hubKey][sc] = null;
         }
       }
     }
 
+    dbg('=== Portfolio Load Complete ===');
     document.getElementById('lastUpdated').textContent = 'Last refreshed: ' + new Date().toLocaleTimeString();
     renderPortfolio();
   } catch (err) {
     showError('Error loading portfolio: ' + (err.message || err));
-    showEmptyState('Failed to load data. Check your Supabase configuration.');
+    showEmptyState('Failed to load data. Check your Supabase configuration and table names.');
+    dbg('FATAL: ' + (err.message || err));
   }
 }
 
@@ -418,33 +586,37 @@ function renderPortfolio() {
 }
 
 function renderKPIs() {
-  let totalNPV = 0, totalDevCost = 0, totalRevenue = 0;
-  let irrValues = [], activeCount = 0;
+  var totalNPV = 0, totalDevCost = 0, totalRevenue = 0;
+  var irrValues = [], activeCount = 0;
 
-  for (const hub of hubRegistry) {
-    const snap = hubSnapshots[hub.hub_key]?.[currentScenario];
+  var hubKeys = Object.keys(hubMeta);
+  for (var i = 0; i < hubKeys.length; i++) {
+    var key = hubKeys[i];
+    var snap = hubSnapshots[key] ? hubSnapshots[key][currentScenario] : null;
     if (!snap) continue;
     activeCount++;
-    totalNPV += parseFloat(snap.npv || 0);
-    totalDevCost += parseFloat(snap.total_dev_cost || 0);
-    totalRevenue += parseFloat(snap.total_revenue || snap.annual_revenue || 0);
-    const irr = parseFloat(snap.irr || 0);
-    if (!isNaN(irr)) irrValues.push(irr);
+    totalNPV += getVal(snap, NPV_COLS, 0);
+    totalDevCost += getVal(snap, DEV_COLS, 0);
+    totalRevenue += getVal(snap, REV_COLS, 0);
+    var irr = getVal(snap, IRR_COLS, null);
+    if (irr !== null) irrValues.push(irr);
   }
 
-  const avgIRR = irrValues.length > 0 ? irrValues.reduce((a, b) => a + b, 0) / irrValues.length : 0;
+  var avgIRR = irrValues.length > 0 ? irrValues.reduce(function(a, b) { return a + b; }, 0) / irrValues.length : 0;
 
-  const kpis = [
+  var kpis = [
     { label: 'Total Portfolio NPV', unit: '$(USD)', value: totalNPV, format: 'currency', colorize: true },
     { label: 'Weighted Avg IRR', unit: '%', value: avgIRR, format: 'pct', colorize: true },
     { label: 'Total Dev Cost', unit: '$(USD)', value: totalDevCost, format: 'currency', colorize: false },
     { label: 'Total Revenue', unit: '$(USD)', value: totalRevenue, format: 'currency', colorize: false },
-    { label: 'Active Hubs', unit: '', value: activeCount, format: 'int', colorize: false },
+    { label: 'Active Hubs', unit: '', value: activeCount, format: 'int', colorize: false }
   ];
 
-  const container = document.getElementById('portfolioKPIs');
-  container.innerHTML = kpis.map(k => {
-    let displayVal, colorClass = '';
+  var container = document.getElementById('portfolioKPIs');
+  var html = '';
+  for (var j = 0; j < kpis.length; j++) {
+    var k = kpis[j];
+    var displayVal, colorClass = '';
     if (k.format === 'currency') {
       displayVal = '$' + formatNumber(k.value, 2);
       if (k.colorize) colorClass = k.value > 0 ? 'positive' : k.value < 0 ? 'negative' : '';
@@ -454,73 +626,76 @@ function renderKPIs() {
     } else {
       displayVal = k.value;
     }
-    return `
-      <div class="kpi-card">
-        <div class="kpi-label">${k.label} ${k.unit ? '<span class="kpi-unit">' + k.unit + '</span>' : ''}</div>
-        <div class="kpi-value ${colorClass}">${displayVal}</div>
-        <div class="kpi-sub">Scenario: ${formatScenarioName(currentScenario)}</div>
-      </div>`;
-  }).join('');
+    html += '<div class="kpi-card">' +
+      '<div class="kpi-label">' + k.label + ' ' + (k.unit ? '<span class="kpi-unit">' + k.unit + '</span>' : '') + '</div>' +
+      '<div class="kpi-value ' + colorClass + '">' + displayVal + '</div>' +
+      '<div class="kpi-sub">Scenario: ' + formatScenarioName(currentScenario) + '</div>' +
+      '</div>';
+  }
+  container.innerHTML = html;
 }
 
 function renderHubCards() {
-  const container = document.getElementById('hubContainer');
-  document.getElementById('hubCount').textContent = hubRegistry.length + ' hub' + (hubRegistry.length !== 1 ? 's' : '');
+  var container = document.getElementById('hubContainer');
+  var hubKeys = Object.keys(hubMeta);
+  document.getElementById('hubCount').textContent = hubKeys.length + ' hub' + (hubKeys.length !== 1 ? 's' : '');
 
-  if (hubRegistry.length === 0) {
-    container.innerHTML = `
-      <div class="empty-state">
-        <div class="icon">&#x1F4ED;</div>
-        <p>No ROI Hubs registered yet.</p>
-        <p style="font-size:.75rem;margin-top:6px">Add hubs to <code>roi_hub_registry</code> in Supabase to get started.</p>
-      </div>`;
+  if (hubKeys.length === 0) {
+    container.innerHTML = '<div class="empty-state"><div class="icon">&#x1F4ED;</div>' +
+      '<p>No ROI Hubs registered yet.</p>' +
+      '<p style="font-size:.75rem;margin-top:6px">Add hubs to <code>roi_hub_registry</code> in Supabase to get started.</p></div>';
     return;
   }
 
-  let html = '<div class="hub-grid">';
-  for (const hub of hubRegistry) {
-    const snap = hubSnapshots[hub.hub_key]?.[currentScenario];
-    const npv = snap ? parseFloat(snap.npv || 0) : null;
-    const irr = snap ? parseFloat(snap.irr || 0) : null;
-    const devCost = snap ? parseFloat(snap.total_dev_cost || 0) : null;
+  var html = '<div class="hub-grid">';
+  for (var i = 0; i < hubKeys.length; i++) {
+    var key = hubKeys[i];
+    var meta = hubMeta[key];
+    var snap = hubSnapshots[key] ? hubSnapshots[key][currentScenario] : null;
+    var npv = snap ? getVal(snap, NPV_COLS, null) : null;
+    var irr = snap ? getVal(snap, IRR_COLS, null) : null;
+    var devCost = snap ? getVal(snap, DEV_COLS, null) : null;
 
-    let dotClass = 'orange';
+    var dotClass = 'orange';
     if (npv !== null) { dotClass = npv > 0 ? 'green' : npv < 0 ? 'red' : 'orange'; }
 
-    const hubUrl = hub.hub_url || '#';
-    html += `
-      <div class="hub-card" onclick="if('${hubUrl}'!=='#') window.open('${hubUrl}','_blank')">
-        <div class="hub-card-header">
-          <div class="hub-card-title">
-            <span class="status-dot ${dotClass}"></span>
-            ${escapeHtml(hub.hub_name || hub.hub_key)}
-          </div>
-          <a class="hub-card-link" href="${hubUrl}" target="_blank" onclick="event.stopPropagation()">Open Hub &rarr;</a>
-        </div>
-        <div class="hub-card-body">
-          ${snap ? `
-          <div class="hub-kpi-row">
-            <div class="hub-kpi">
-              <div class="hub-kpi-label">NPV</div>
-              <div class="hub-kpi-value ${npv > 0 ? 'positive' : npv < 0 ? 'negative' : ''}" style="color:${npv > 0 ? 'var(--green)' : npv < 0 ? 'var(--red)' : 'var(--text-primary)'}">$${formatNumber(npv, 2)}</div>
-              <span class="hub-kpi-unit">$(USD)</span>
-            </div>
-            <div class="hub-kpi">
-              <div class="hub-kpi-label">IRR</div>
-              <div class="hub-kpi-value" style="color:${irr > 0 ? 'var(--green)' : irr < 0 ? 'var(--red)' : 'var(--text-primary)'}">${formatNumber(irr, 1)}%</div>
-              <span class="hub-kpi-unit">%</span>
-            </div>
-            <div class="hub-kpi">
-              <div class="hub-kpi-label">Dev Cost</div>
-              <div class="hub-kpi-value">$${formatNumber(devCost, 2)}</div>
-              <span class="hub-kpi-unit">$(USD)</span>
-            </div>
-          </div>` : `
-          <div style="text-align:center;padding:12px;color:var(--text-muted);font-size:.8rem">
-            No data for <strong>${formatScenarioName(currentScenario)}</strong> scenario
-          </div>`}
-        </div>
-      </div>`;
+    var hubUrl = meta.url || '#';
+    var safeName = escapeHtml(meta.name || key);
+
+    html += '<div class="hub-card" onclick="if(\'' + hubUrl.replace(/'/g, "\\'") + '\'!==\'#\') window.open(\'' + hubUrl.replace(/'/g, "\\'") + '\',\'_blank\')">' +
+      '<div class="hub-card-header">' +
+        '<div class="hub-card-title">' +
+          '<span class="status-dot ' + dotClass + '"></span>' +
+          safeName +
+        '</div>' +
+        '<a class="hub-card-link" href="' + escapeHtml(hubUrl) + '" target="_blank" onclick="event.stopPropagation()">Open Hub &rarr;</a>' +
+      '</div>' +
+      '<div class="hub-card-body">';
+
+    if (snap) {
+      html += '<div class="hub-kpi-row">' +
+        '<div class="hub-kpi">' +
+          '<div class="hub-kpi-label">NPV</div>' +
+          '<div class="hub-kpi-value" style="color:' + (npv > 0 ? 'var(--green)' : npv < 0 ? 'var(--red)' : 'var(--text-primary)') + '">$' + formatNumber(npv !== null ? npv : 0, 2) + '</div>' +
+          '<span class="hub-kpi-unit">$(USD)</span>' +
+        '</div>' +
+        '<div class="hub-kpi">' +
+          '<div class="hub-kpi-label">IRR</div>' +
+          '<div class="hub-kpi-value" style="color:' + (irr > 0 ? 'var(--green)' : irr < 0 ? 'var(--red)' : 'var(--text-primary)') + '">' + (irr !== null ? formatNumber(irr, 1) + '%' : '\u2014') + '</div>' +
+          '<span class="hub-kpi-unit">%</span>' +
+        '</div>' +
+        '<div class="hub-kpi">' +
+          '<div class="hub-kpi-label">Dev Cost</div>' +
+          '<div class="hub-kpi-value">$' + (devCost !== null ? formatNumber(devCost, 2) : '\u2014') + '</div>' +
+          '<span class="hub-kpi-unit">$(USD)</span>' +
+        '</div>' +
+      '</div>';
+    } else {
+      html += '<div style="text-align:center;padding:12px;color:var(--text-muted);font-size:.8rem">' +
+        'No data for <strong>' + formatScenarioName(currentScenario) + '</strong> scenario</div>';
+    }
+
+    html += '</div></div>';
   }
   html += '</div>';
   container.innerHTML = html;
@@ -529,136 +704,138 @@ function renderHubCards() {
 // ── Scenario Switching ──────────────────────────────────
 function switchScenario(scenario) {
   currentScenario = scenario;
-  document.querySelectorAll('.scenario-tab').forEach(tab => {
+  document.querySelectorAll('.scenario-tab').forEach(function(tab) {
     tab.classList.toggle('active', tab.dataset.scenario === scenario);
   });
+  dbg('Switched scenario to: ' + formatScenarioName(scenario));
   renderPortfolio();
 }
 
 // ── Portfolio AI ────────────────────────────────────────
 function toggleAI() {
-  const panel = document.getElementById('aiPanel');
-  const main = document.getElementById('mainContent');
+  var panel = document.getElementById('aiPanel');
+  var main = document.getElementById('mainContent');
   panel.classList.toggle('open');
   main.classList.toggle('ai-open');
 }
 
 function sendAIMessage() {
-  const input = document.getElementById('aiInput');
-  const text = input.value.trim();
+  var input = document.getElementById('aiInput');
+  var text = input.value.trim();
   if (!text) return;
   input.value = '';
 
-  const msgArea = document.getElementById('aiMessages');
+  var msgArea = document.getElementById('aiMessages');
+  msgArea.innerHTML += '<div class="ai-msg user">' + escapeHtml(text) + '</div>';
 
-  // User message
-  msgArea.innerHTML += `<div class="ai-msg user">${escapeHtml(text)}</div>`;
-
-  // Typing indicator
-  const typingId = 'typing-' + Date.now();
-  msgArea.innerHTML += `<div class="ai-msg system" id="${typingId}"><div class="typing"><span></span><span></span><span></span></div></div>`;
+  var typingId = 'typing-' + Date.now();
+  msgArea.innerHTML += '<div class="ai-msg system" id="' + typingId + '"><div class="typing"><span></span><span></span><span></span></div></div>';
   msgArea.scrollTop = msgArea.scrollHeight;
 
-  // Simulate AI analysis response
-  setTimeout(() => {
-    const el = document.getElementById(typingId);
+  setTimeout(function() {
+    var el = document.getElementById(typingId);
     if (!el) return;
-
-    // Build context-aware response based on current data
-    let response = generateAIResponse(text);
-    el.innerHTML = response;
+    el.innerHTML = generateAIResponse(text);
     msgArea.scrollTop = msgArea.scrollHeight;
   }, 1500);
 }
 
 function generateAIResponse(query) {
-  const q = query.toLowerCase();
-  let totalNPV = 0, totalDev = 0, totalRev = 0, irrArr = [], count = 0;
-  for (const hub of hubRegistry) {
-    const snap = hubSnapshots[hub.hub_key]?.[currentScenario];
+  var q = query.toLowerCase();
+  var hubKeys = Object.keys(hubMeta);
+  var totalNPV = 0, totalDev = 0, totalRev = 0, irrArr = [], count = 0;
+  for (var i = 0; i < hubKeys.length; i++) {
+    var snap = hubSnapshots[hubKeys[i]] ? hubSnapshots[hubKeys[i]][currentScenario] : null;
     if (!snap) continue;
     count++;
-    totalNPV += parseFloat(snap.npv || 0);
-    totalDev += parseFloat(snap.total_dev_cost || 0);
-    totalRev += parseFloat(snap.total_revenue || snap.annual_revenue || 0);
-    irrArr.push(parseFloat(snap.irr || 0));
+    totalNPV += getVal(snap, NPV_COLS, 0);
+    totalDev += getVal(snap, DEV_COLS, 0);
+    totalRev += getVal(snap, REV_COLS, 0);
+    irrArr.push(getVal(snap, IRR_COLS, 0));
   }
-  const avgIRR = irrArr.length ? (irrArr.reduce((a,b)=>a+b,0)/irrArr.length) : 0;
+  var avgIRR = irrArr.length ? (irrArr.reduce(function(a,b){return a+b;},0)/irrArr.length) : 0;
 
-  if (q.includes('summary') || q.includes('overview') || q.includes('portfolio')) {
-    return `&#x1F4CA; <strong>Portfolio Summary (${formatScenarioName(currentScenario)})</strong><br><br>` +
-      `&bull; <strong>${count}</strong> active hubs<br>` +
-      `&bull; Total NPV: <strong>$${formatNumber(totalNPV,2)}</strong><br>` +
-      `&bull; Avg IRR: <strong>${formatNumber(avgIRR,1)}%</strong><br>` +
-      `&bull; Total Dev Cost: <strong>$${formatNumber(totalDev,2)}</strong><br>` +
-      `&bull; Total Revenue: <strong>$${formatNumber(totalRev,2)}</strong><br><br>` +
-      `<em>Try switching scenarios to compare Low vs High projections.</em>`;
+  if (q.indexOf('summary') >= 0 || q.indexOf('overview') >= 0 || q.indexOf('portfolio') >= 0) {
+    return '&#x1F4CA; <strong>Portfolio Summary (' + formatScenarioName(currentScenario) + ')</strong><br><br>' +
+      '&bull; <strong>' + count + '</strong> active hubs<br>' +
+      '&bull; Total NPV: <strong>$' + formatNumber(totalNPV,2) + '</strong><br>' +
+      '&bull; Avg IRR: <strong>' + formatNumber(avgIRR,1) + '%</strong><br>' +
+      '&bull; Total Dev Cost: <strong>$' + formatNumber(totalDev,2) + '</strong><br>' +
+      '&bull; Total Revenue: <strong>$' + formatNumber(totalRev,2) + '</strong><br><br>' +
+      '<em>Try switching scenarios to compare Low vs High projections.</em>';
   }
-  if (q.includes('best') || q.includes('top') || q.includes('winner')) {
-    let best = null, bestNPV = -Infinity;
-    for (const hub of hubRegistry) {
-      const snap = hubSnapshots[hub.hub_key]?.[currentScenario];
-      if (snap && parseFloat(snap.npv||0) > bestNPV) { bestNPV = parseFloat(snap.npv||0); best = hub; }
+  if (q.indexOf('best') >= 0 || q.indexOf('top') >= 0 || q.indexOf('winner') >= 0) {
+    var best = null, bestNPV = -Infinity;
+    for (var j = 0; j < hubKeys.length; j++) {
+      var s = hubSnapshots[hubKeys[j]] ? hubSnapshots[hubKeys[j]][currentScenario] : null;
+      if (!s) continue;
+      var n = getVal(s, NPV_COLS, -Infinity);
+      if (n > bestNPV) { bestNPV = n; best = hubMeta[hubKeys[j]]; }
     }
-    if (best) return `&#x1F3C6; The top-performing hub under <strong>${formatScenarioName(currentScenario)}</strong> is <strong>${escapeHtml(best.hub_name||best.hub_key)}</strong> with an NPV of <strong>$${formatNumber(bestNPV,2)}</strong>.`;
+    if (best) return '&#x1F3C6; Top hub under <strong>' + formatScenarioName(currentScenario) + '</strong> is <strong>' + escapeHtml(best.name) + '</strong> with NPV <strong>$' + formatNumber(bestNPV,2) + '</strong>.';
   }
-  if (q.includes('risk') || q.includes('worst') || q.includes('negative')) {
-    let negHubs = [];
-    for (const hub of hubRegistry) {
-      const snap = hubSnapshots[hub.hub_key]?.[currentScenario];
-      if (snap && parseFloat(snap.npv||0) < 0) negHubs.push(hub.hub_name||hub.hub_key);
+  if (q.indexOf('risk') >= 0 || q.indexOf('worst') >= 0 || q.indexOf('negative') >= 0) {
+    var negHubs = [];
+    for (var k = 0; k < hubKeys.length; k++) {
+      var ss = hubSnapshots[hubKeys[k]] ? hubSnapshots[hubKeys[k]][currentScenario] : null;
+      if (!ss) continue;
+      if (getVal(ss, NPV_COLS, 0) < 0) negHubs.push(hubMeta[hubKeys[k]].name);
     }
-    if (negHubs.length) return `&#x26A0;&#xFE0F; <strong>${negHubs.length}</strong> hub(s) show negative NPV: ${negHubs.map(n=>'<strong>'+escapeHtml(n)+'</strong>').join(', ')}. Consider reviewing assumptions in the Low scenario.`;
-    return `&#x2705; All hubs currently show non-negative NPV under the <strong>${formatScenarioName(currentScenario)}</strong> scenario. Portfolio health looks good!`;
+    if (negHubs.length) return '&#x26A0;&#xFE0F; <strong>' + negHubs.length + '</strong> hub(s) with negative NPV: ' + negHubs.map(function(nm){return '<strong>'+escapeHtml(nm)+'</strong>';}).join(', ');
+    return '&#x2705; All hubs have non-negative NPV under <strong>' + formatScenarioName(currentScenario) + '</strong>.';
+  }
+  if (q.indexOf('debug') >= 0 || q.indexOf('schema') >= 0 || q.indexOf('column') >= 0) {
+    var info = '&#x1F41E; <strong>Debug Info</strong><br><br>Registry hubs: ' + hubKeys.length + '<br>';
+    for (var d = 0; d < hubKeys.length; d++) {
+      var ds = hubSnapshots[hubKeys[d]] ? hubSnapshots[hubKeys[d]][currentScenario] : null;
+      info += '<br><strong>' + escapeHtml(hubMeta[hubKeys[d]].name) + '</strong> (table: ' + hubMeta[hubKeys[d]].tableName + ')<br>';
+      if (ds) { info += 'Columns: ' + Object.keys(ds).join(', ') + '<br>'; } else { info += 'No data<br>'; }
+    }
+    return info;
   }
 
-  return `&#x1F916; <strong>Portfolio AI</strong> is analyzing your query...<br><br>` +
-    `Based on the current <strong>${formatScenarioName(currentScenario)}</strong> scenario with <strong>${count}</strong> active hubs, ` +
-    `the portfolio NPV is <strong>$${formatNumber(totalNPV,2)}</strong> with an average IRR of <strong>${formatNumber(avgIRR,1)}%</strong>.<br><br>` +
-    `<em>Tip: Try asking "portfolio summary", "top performer", or "risk analysis".</em>`;
+  return '&#x1F916; <strong>Portfolio AI</strong><br><br>' +
+    'Scenario: <strong>' + formatScenarioName(currentScenario) + '</strong> | <strong>' + count + '</strong> hubs<br>' +
+    'NPV: <strong>$' + formatNumber(totalNPV,2) + '</strong> | IRR: <strong>' + formatNumber(avgIRR,1) + '%</strong><br><br>' +
+    '<em>Try: "portfolio summary", "top performer", "risk analysis", "debug schema"</em>';
 }
 
 // ── Utility Functions ───────────────────────────────────
 function formatNumber(num, decimals) {
-  if (num === null || num === undefined || isNaN(num)) return '—';
+  if (num === null || num === undefined || isNaN(num)) return '\u2014';
   return Number(num).toLocaleString('en-US', { minimumFractionDigits: decimals, maximumFractionDigits: decimals });
 }
 
 function formatScenarioName(sc) {
-  const map = { low: 'Low', most_likely: 'Most Likely', high: 'High' };
+  var map = { low: 'Low', most_likely: 'Most Likely', high: 'High' };
   return map[sc] || sc;
 }
 
 function escapeHtml(str) {
-  const div = document.createElement('div');
+  if (!str) return '';
+  var div = document.createElement('div');
   div.appendChild(document.createTextNode(str));
   return div.innerHTML;
 }
 
 function showLoading() {
-  document.getElementById('hubContainer').innerHTML = `
-    <div class="loading-overlay" id="loadingState">
-      <div class="spinner"></div>
-      <div class="loading-text">Loading portfolio data from Supabase...</div>
-    </div>`;
-  document.getElementById('portfolioKPIs').innerHTML = Array(5).fill(`
-    <div class="kpi-card" style="opacity:.5">
-      <div class="kpi-label">Loading...</div>
-      <div class="kpi-value" style="color:var(--text-muted)">—</div>
-    </div>`).join('');
+  document.getElementById('hubContainer').innerHTML =
+    '<div class="loading-overlay"><div class="spinner"></div><div class="loading-text">Loading portfolio data from Supabase...</div></div>';
+  var placeholder = '';
+  for (var i = 0; i < 5; i++) {
+    placeholder += '<div class="kpi-card" style="opacity:.5"><div class="kpi-label">Loading...</div><div class="kpi-value" style="color:var(--text-muted)">&mdash;</div></div>';
+  }
+  document.getElementById('portfolioKPIs').innerHTML = placeholder;
 }
 
 function showEmptyState(msg) {
-  document.getElementById('hubContainer').innerHTML = `
-    <div class="empty-state">
-      <div class="icon">&#x1F50C;</div>
-      <p>${msg}</p>
-    </div>`;
+  document.getElementById('hubContainer').innerHTML = '<div class="empty-state"><div class="icon">&#x1F50C;</div><p>' + msg + '</p></div>';
 }
 
 function showError(msg) {
-  document.getElementById('errorContainer').innerHTML = `<div class="error-msg">&#x26D4; ${escapeHtml(msg)}</div>`;
+  document.getElementById('errorContainer').innerHTML = '<div class="error-msg">&#x26D4; ' + escapeHtml(msg) + '</div>';
 }
+
 function clearError() {
   document.getElementById('errorContainer').innerHTML = '';
 }
