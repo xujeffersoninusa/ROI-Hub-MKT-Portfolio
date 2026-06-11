@@ -3,9 +3,10 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>ROI Portfolio Dashboard — Teradyne ROI Hub OS</title>
+<title>ROI Portfolio Dashboard - Teradyne ROI Hub OS</title>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
 <style>
+
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 :root{
   --bg-primary:#1a1a2e;--bg-secondary:#16213e;--bg-card:#0f3460;
@@ -21,86 +22,93 @@ a{color:var(--accent);text-decoration:none}a:hover{text-decoration:underline}
 ::-webkit-scrollbar{width:6px}
 ::-webkit-scrollbar-track{background:var(--bg-secondary)}
 ::-webkit-scrollbar-thumb{background:var(--accent);border-radius:3px}
-.header{display:flex;align-items:center;justify-content:space-between;padding:16px 32px;background:var(--bg-secondary);border-bottom:1px solid var(--border);position:sticky;top:0;z-index:100}
-.header-left{display:flex;align-items:center;gap:16px}
-.logo{font-size:1.6rem;font-weight:800;color:var(--accent);letter-spacing:-.5px}
+.header{display:flex;align-items:center;justify-content:space-between;padding:14px 28px;background:var(--bg-secondary);border-bottom:1px solid var(--border);position:sticky;top:0;z-index:100}
+.header-left{display:flex;align-items:center;gap:14px}
+.logo{font-size:1.5rem;font-weight:800;color:var(--accent);letter-spacing:-.5px}
 .logo span{color:var(--text-primary);font-weight:400}
-.header-title{font-size:1.15rem;color:var(--text-secondary);border-left:2px solid var(--border);padding-left:16px}
-.header-right{display:flex;align-items:center;gap:12px}
-.btn{display:inline-flex;align-items:center;gap:6px;padding:8px 18px;border-radius:8px;font-size:.85rem;font-weight:600;cursor:pointer;border:none;transition:var(--transition)}
+.header-title{font-size:1rem;color:var(--text-secondary);border-left:2px solid var(--border);padding-left:14px}
+.header-right{display:flex;align-items:center;gap:10px}
+.btn{display:inline-flex;align-items:center;gap:6px;padding:7px 16px;border-radius:8px;font-size:.82rem;font-weight:600;cursor:pointer;border:none;transition:var(--transition)}
 .btn-accent{background:var(--accent);color:#fff}
 .btn-accent:hover{background:var(--accent-hover);transform:translateY(-1px)}
 .btn-ghost{background:transparent;color:var(--text-secondary);border:1px solid var(--border)}
 .btn-ghost:hover{border-color:var(--accent);color:var(--accent)}
 .app-wrapper{display:flex;flex:1;overflow:hidden}
-.main-content{flex:1;overflow-y:auto;padding:28px 32px 80px;transition:var(--transition)}
+.main-content{flex:1;overflow-y:auto;padding:24px 28px 80px;transition:var(--transition)}
 .main-content.ai-open{margin-right:380px}
-.config-banner{background:#2d1810;border:1px solid var(--accent);border-radius:var(--radius);padding:20px 24px;margin-bottom:24px;display:none}
+.config-banner{background:#2d1810;border:1px solid var(--accent);border-radius:var(--radius);padding:18px 22px;margin-bottom:20px;display:none}
 .config-banner.visible{display:block}
-.config-banner h3{color:var(--accent);margin-bottom:8px;font-size:1rem}
-.config-banner p{color:var(--text-secondary);font-size:.85rem;margin-bottom:14px}
-.config-form{display:flex;gap:10px;flex-wrap:wrap}
-.config-form input{flex:1;min-width:200px;padding:8px 14px;border-radius:8px;border:1px solid var(--border);background:var(--bg-primary);color:var(--text-primary);font-size:.85rem}
+.config-banner h3{color:var(--accent);margin-bottom:6px;font-size:.95rem}
+.config-banner p{color:var(--text-secondary);font-size:.82rem;margin-bottom:12px}
+.config-form{display:flex;gap:8px;flex-wrap:wrap}
+.config-form input{flex:1;min-width:180px;padding:8px 12px;border-radius:8px;border:1px solid var(--border);background:var(--bg-primary);color:var(--text-primary);font-size:.82rem}
 .config-form input::placeholder{color:var(--text-muted)}
-.debug-banner{background:#1a2e1a;border:1px solid var(--green);border-radius:var(--radius);padding:14px 20px;margin-bottom:20px;font-family:monospace;font-size:.75rem;color:var(--green);max-height:250px;overflow-y:auto;display:none;white-space:pre-wrap}
+.debug-banner{background:#1a2e1a;border:1px solid var(--green);border-radius:var(--radius);padding:12px 18px;margin-bottom:18px;font-family:monospace;font-size:.72rem;color:var(--green);max-height:220px;overflow-y:auto;display:none;white-space:pre-wrap}
 .debug-banner.visible{display:block}
-.controls-row{display:flex;align-items:center;justify-content:space-between;margin-bottom:24px;flex-wrap:wrap;gap:12px}
+.controls-row{display:flex;align-items:center;justify-content:space-between;margin-bottom:22px;flex-wrap:wrap;gap:12px}
 .scenario-tabs{display:flex;gap:4px;background:var(--bg-secondary);padding:4px;border-radius:10px}
-.scenario-tab{padding:10px 28px;border-radius:8px;font-size:.9rem;font-weight:600;cursor:pointer;border:none;background:transparent;color:var(--text-muted);transition:var(--transition);position:relative}
+.scenario-tab{padding:9px 26px;border-radius:8px;font-size:.88rem;font-weight:600;cursor:pointer;border:none;background:transparent;color:var(--text-muted);transition:var(--transition)}
 .scenario-tab:hover{color:var(--text-primary)}
 .scenario-tab.active{background:var(--accent);color:#fff;box-shadow:0 2px 12px rgba(255,102,0,.35)}
-.scenario-tab .tab-badge{position:absolute;top:-4px;right:-4px;width:8px;height:8px;border-radius:50%;background:var(--green);display:none}
-.scenario-tab.active .tab-badge{display:block}
-.controls-right{display:flex;align-items:center;gap:10px}
-.last-updated{font-size:.75rem;color:var(--text-muted)}
-.kpi-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:16px;margin-bottom:32px}
-.kpi-card{background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius);padding:20px;position:relative;overflow:hidden;transition:var(--transition)}
+.last-updated{font-size:.72rem;color:var(--text-muted)}
+.kpi-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(195px,1fr));gap:14px;margin-bottom:28px}
+.kpi-card{background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius);padding:18px;position:relative;overflow:hidden;transition:var(--transition)}
 .kpi-card:hover{transform:translateY(-2px);box-shadow:var(--shadow);border-color:var(--accent)}
 .kpi-card::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,var(--accent),#ff8533)}
-.kpi-label{font-size:.75rem;color:var(--text-muted);text-transform:uppercase;letter-spacing:.8px;margin-bottom:6px;display:flex;align-items:center;gap:6px}
-.kpi-unit{display:inline-block;padding:1px 6px;border-radius:4px;background:rgba(255,102,0,.15);color:var(--accent);font-size:.65rem;font-weight:700}
-.kpi-value{font-size:1.65rem;font-weight:800;color:var(--text-primary);line-height:1.2}
+.kpi-label{font-size:.72rem;color:var(--text-muted);text-transform:uppercase;letter-spacing:.8px;margin-bottom:5px;display:flex;align-items:center;gap:6px}
+.kpi-unit{display:inline-block;padding:1px 5px;border-radius:4px;background:rgba(255,102,0,.15);color:var(--accent);font-size:.62rem;font-weight:700}
+.kpi-value{font-size:1.55rem;font-weight:800;line-height:1.2}
 .kpi-value.positive{color:var(--green)}
 .kpi-value.negative{color:var(--red)}
-.kpi-sub{font-size:.7rem;color:var(--text-muted);margin-top:4px}
-.section-header{display:flex;align-items:center;gap:10px;margin-bottom:18px}
-.section-header h2{font-size:1.15rem;font-weight:700}
+.kpi-sub{font-size:.68rem;color:var(--text-muted);margin-top:3px}
+.section-header{display:flex;align-items:center;gap:10px;margin-bottom:16px}
+.section-header h2{font-size:1.1rem;font-weight:700}
 .section-header .line{flex:1;height:1px;background:var(--border)}
-.hub-count{padding:2px 10px;border-radius:12px;background:rgba(255,102,0,.15);color:var(--accent);font-size:.75rem;font-weight:700}
-.hub-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(310px,1fr));gap:18px}
-.hub-card{background:var(--bg-surface);border:1px solid var(--border);border-radius:var(--radius);padding:0;overflow:hidden;transition:var(--transition);cursor:pointer}
+.hub-count{padding:2px 10px;border-radius:12px;background:rgba(255,102,0,.15);color:var(--accent);font-size:.72rem;font-weight:700}
+.hub-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(340px,1fr));gap:16px}
+.hub-card{background:var(--bg-surface);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden;transition:var(--transition);cursor:pointer;border-top:3px solid var(--border)}
 .hub-card:hover{transform:translateY(-3px);box-shadow:var(--shadow);border-color:var(--accent)}
-.hub-card-header{display:flex;align-items:center;justify-content:space-between;padding:16px 20px 12px;border-bottom:1px solid rgba(255,255,255,.05)}
-.hub-card-title{font-size:1rem;font-weight:700;display:flex;align-items:center;gap:8px}
-.status-dot{width:9px;height:9px;border-radius:50%;flex-shrink:0}
-.status-dot.green{background:var(--green);box-shadow:0 0 8px rgba(72,187,120,.5)}
-.status-dot.red{background:var(--red);box-shadow:0 0 8px rgba(252,129,129,.5)}
-.status-dot.orange{background:var(--orange);box-shadow:0 0 8px rgba(246,173,85,.5)}
-.hub-card-link{font-size:.7rem;color:var(--text-muted)}
-.hub-card-link:hover{color:var(--accent)}
-.hub-card-body{padding:14px 20px 18px}
-.hub-kpi-row{display:flex;justify-content:space-between;gap:8px}
-.hub-kpi{flex:1;text-align:center;padding:8px 4px;border-radius:8px;background:rgba(0,0,0,.2)}
-.hub-kpi-label{font-size:.65rem;color:var(--text-muted);text-transform:uppercase;letter-spacing:.5px;margin-bottom:4px}
+.hub-card.go{border-top-color:var(--green)}
+.hub-card.nogo{border-top-color:var(--red)}
+.hub-card.caution{border-top-color:var(--orange)}
+.hub-card-header{padding:16px 18px 10px;display:flex;justify-content:space-between;align-items:flex-start}
+.hub-card-title-area{flex:1}
+.hub-card-title{font-size:1.05rem;font-weight:700;margin-bottom:4px}
+.hub-card-sub{font-size:.72rem;color:var(--text-muted)}
+.hub-card-sub span{margin-right:6px}
+.status-badge{display:inline-block;padding:3px 10px;border-radius:6px;font-size:.68rem;font-weight:700;text-transform:uppercase;letter-spacing:.5px;flex-shrink:0}
+.status-badge.go{background:rgba(72,187,120,.15);color:var(--green);border:1px solid rgba(72,187,120,.3)}
+.status-badge.nogo{background:rgba(252,129,129,.15);color:var(--red);border:1px solid rgba(252,129,129,.3)}
+.status-badge.caution{background:rgba(246,173,85,.15);color:var(--orange);border:1px solid rgba(246,173,85,.3)}
+.status-badge.pending{background:rgba(113,128,150,.15);color:var(--text-muted);border:1px solid rgba(113,128,150,.3)}
+.hub-card-body{padding:8px 18px 16px}
+.hub-kpi-row{display:flex;gap:8px}
+.hub-kpi{flex:1;text-align:center;padding:10px 6px;border-radius:8px;background:rgba(0,0,0,.25)}
+.hub-kpi-label{font-size:.62rem;color:var(--text-muted);text-transform:uppercase;letter-spacing:.5px;margin-bottom:4px}
 .hub-kpi-value{font-size:1.05rem;font-weight:700}
-.hub-kpi-unit{font-size:.55rem;color:var(--text-muted);display:block;margin-top:1px}
+.hub-kpi-unit{font-size:.55rem;color:var(--text-muted);display:block;margin-top:2px}
+.hub-card-footer{padding:0 18px 14px;display:flex;justify-content:space-between;align-items:center}
+.hub-card-meta{font-size:.68rem;color:var(--text-muted)}
+.hub-card-meta span{margin-right:10px}
+.hub-open-link{font-size:.72rem;color:var(--accent);font-weight:600;text-decoration:none}
+.hub-open-link:hover{text-decoration:underline}
 .loading-overlay{display:flex;flex-direction:column;align-items:center;justify-content:center;padding:60px 20px}
-.spinner{width:40px;height:40px;border:3px solid var(--border);border-top-color:var(--accent);border-radius:50%;animation:spin .8s linear infinite;margin-bottom:16px}
+.spinner{width:40px;height:40px;border:3px solid var(--border);border-top-color:var(--accent);border-radius:50%;animation:spin .8s linear infinite;margin-bottom:14px}
 @keyframes spin{to{transform:rotate(360deg)}}
-.loading-text{color:var(--text-muted);font-size:.85rem}
+.loading-text{color:var(--text-muted);font-size:.82rem}
 .empty-state{text-align:center;padding:60px 20px;color:var(--text-muted)}
-.empty-state .icon{font-size:2.5rem;margin-bottom:12px}
-.error-msg{background:#2d1810;border:1px solid var(--red);border-radius:8px;padding:14px 18px;color:var(--red);font-size:.85rem;margin-bottom:16px}
+.empty-state .icon{font-size:2.5rem;margin-bottom:10px}
+.error-msg{background:#2d1810;border:1px solid var(--red);border-radius:8px;padding:12px 16px;color:var(--red);font-size:.82rem;margin-bottom:14px}
 .ai-panel{position:fixed;top:0;right:-400px;width:380px;height:100vh;background:var(--bg-secondary);border-left:1px solid var(--border);display:flex;flex-direction:column;z-index:200;transition:right .35s cubic-bezier(.4,0,.2,1);box-shadow:-8px 0 32px rgba(0,0,0,.4)}
 .ai-panel.open{right:0}
-.ai-header{display:flex;align-items:center;justify-content:space-between;padding:16px 20px;border-bottom:1px solid var(--border)}
-.ai-header h3{font-size:1rem;display:flex;align-items:center;gap:8px}
+.ai-header{display:flex;align-items:center;justify-content:space-between;padding:14px 18px;border-bottom:1px solid var(--border)}
+.ai-header h3{font-size:.95rem;display:flex;align-items:center;gap:8px}
 .ai-header h3 .dot{width:8px;height:8px;border-radius:50%;background:var(--green);animation:pulse 2s infinite}
 @keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
 .ai-close{background:none;border:none;color:var(--text-muted);font-size:1.2rem;cursor:pointer}
 .ai-close:hover{color:var(--text-primary)}
-.ai-messages{flex:1;overflow-y:auto;padding:16px 20px;display:flex;flex-direction:column;gap:12px}
-.ai-msg{max-width:88%;padding:10px 14px;border-radius:12px;font-size:.85rem;line-height:1.5;animation:fadeUp .3s ease}
+.ai-messages{flex:1;overflow-y:auto;padding:14px 18px;display:flex;flex-direction:column;gap:10px}
+.ai-msg{max-width:88%;padding:10px 14px;border-radius:12px;font-size:.82rem;line-height:1.5;animation:fadeUp .3s ease}
 @keyframes fadeUp{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
 .ai-msg.system{background:var(--bg-card);color:var(--text-secondary);align-self:flex-start;border-bottom-left-radius:4px}
 .ai-msg.user{background:var(--accent);color:#fff;align-self:flex-end;border-bottom-right-radius:4px}
@@ -109,21 +117,22 @@ a{color:var(--accent);text-decoration:none}a:hover{text-decoration:underline}
 .ai-msg .typing span:nth-child(2){animation-delay:.2s}
 .ai-msg .typing span:nth-child(3){animation-delay:.4s}
 @keyframes typeDot{0%,60%,100%{opacity:.3;transform:translateY(0)}30%{opacity:1;transform:translateY(-4px)}}
-.ai-input-area{padding:14px 16px;border-top:1px solid var(--border);display:flex;gap:8px}
-.ai-input{flex:1;padding:10px 14px;border-radius:8px;border:1px solid var(--border);background:var(--bg-primary);color:var(--text-primary);font-size:.85rem;resize:none}
+.ai-input-area{padding:12px 14px;border-top:1px solid var(--border);display:flex;gap:8px}
+.ai-input{flex:1;padding:10px 12px;border-radius:8px;border:1px solid var(--border);background:var(--bg-primary);color:var(--text-primary);font-size:.82rem;resize:none}
 .ai-input:focus{outline:none;border-color:var(--accent)}
-.ai-send{padding:10px 16px;border-radius:8px;background:var(--accent);color:#fff;border:none;cursor:pointer;font-weight:700;font-size:.85rem;transition:var(--transition)}
+.ai-send{padding:10px 14px;border-radius:8px;background:var(--accent);color:#fff;border:none;cursor:pointer;font-weight:700;font-size:.82rem;transition:var(--transition)}
 .ai-send:hover{background:var(--accent-hover)}
-.footer{text-align:center;padding:16px;color:var(--text-muted);font-size:.7rem;border-top:1px solid var(--border);background:var(--bg-secondary)}
+.footer{text-align:center;padding:14px;color:var(--text-muted);font-size:.68rem;border-top:1px solid var(--border);background:var(--bg-secondary)}
 @media(max-width:768px){
-  .header{padding:12px 16px;flex-wrap:wrap;gap:8px}
-  .main-content{padding:16px}
+  .header{padding:12px 14px;flex-wrap:wrap;gap:8px}
+  .main-content{padding:14px}
   .kpi-grid{grid-template-columns:repeat(2,1fr)}
   .hub-grid{grid-template-columns:1fr}
   .ai-panel{width:100%}
   .main-content.ai-open{margin-right:0}
-  .scenario-tab{padding:8px 16px;font-size:.8rem}
+  .scenario-tab{padding:8px 14px;font-size:.78rem}
 }
+
 </style>
 </head>
 <body>
@@ -140,12 +149,13 @@ a{color:var(--accent);text-decoration:none}a:hover{text-decoration:underline}
   </div>
 </header>
 
+
 <div class="app-wrapper">
   <div class="main-content" id="mainContent">
 
     <div class="config-banner" id="configBanner">
       <h3>&#x26A0; Supabase Connection Required</h3>
-      <p>Enter your Supabase credentials. Saved to browser local storage.</p>
+      <p>Enter your Supabase project URL and anon key. Stored in browser only.</p>
       <div class="config-form">
         <input id="cfgUrl" placeholder="Supabase URL (https://xxxx.supabase.co)">
         <input id="cfgKey" placeholder="Supabase Anon Key">
@@ -158,20 +168,18 @@ a{color:var(--accent);text-decoration:none}a:hover{text-decoration:underline}
 
     <div class="controls-row">
       <div class="scenario-tabs">
-        <button class="scenario-tab" data-scenario="low" onclick="switchScenario('low')">&#x1F4C9; Low<span class="tab-badge"></span></button>
-        <button class="scenario-tab active" data-scenario="most_likely" onclick="switchScenario('most_likely')">&#x1F3AF; Most Likely<span class="tab-badge"></span></button>
-        <button class="scenario-tab" data-scenario="high" onclick="switchScenario('high')">&#x1F4C8; High<span class="tab-badge"></span></button>
+        <button class="scenario-tab" data-scenario="low" onclick="switchScenario('low')">&#x1F4C9; Low</button>
+        <button class="scenario-tab active" data-scenario="mid" onclick="switchScenario('mid')">&#x1F3AF; Most Likely</button>
+        <button class="scenario-tab" data-scenario="high" onclick="switchScenario('high')">&#x1F4C8; High</button>
       </div>
-      <div class="controls-right">
-        <span class="last-updated" id="lastUpdated"></span>
-      </div>
+      <div><span class="last-updated" id="lastUpdated"></span></div>
     </div>
 
     <div class="kpi-grid" id="portfolioKPIs"></div>
 
     <div class="section-header">
       <h2>&#x1F4E6; Product ROI Hubs</h2>
-      <span class="hub-count" id="hubCount">0 hubs</span>
+      <span class="hub-count" id="hubCount">0</span>
       <div class="line"></div>
     </div>
 
@@ -186,320 +194,221 @@ a{color:var(--accent);text-decoration:none}a:hover{text-decoration:underline}
       <button class="ai-close" onclick="toggleAI()">&times;</button>
     </div>
     <div class="ai-messages" id="aiMessages">
-      <div class="ai-msg system">&#x1F44B; Hello! I'm <strong>Portfolio AI</strong>. Ask me about your ROI portfolio, compare scenarios, or surface insights!</div>
+      <div class="ai-msg system">&#x1F44B; Hi! I'm <strong>Portfolio AI</strong>. Ask me about your ROI portfolio &mdash; summaries, top performers, risk analysis, or scenario comparisons!</div>
     </div>
     <div class="ai-input-area">
-      <textarea class="ai-input" id="aiInput" rows="1" placeholder="Ask about your portfolio..." onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();sendAIMessage()}"></textarea>
-      <button class="ai-send" onclick="sendAIMessage()">Send</button>
+      <textarea class="ai-input" id="aiInput" rows="1" placeholder="Ask about your portfolio..." onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();sendAI()}"></textarea>
+      <button class="ai-send" onclick="sendAI()">Send</button>
     </div>
   </div>
 </div>
 
 <footer class="footer">
-  Teradyne ROI Hub OS &copy; 2026 &nbsp;|&nbsp; Portfolio Dashboard v1.3 &nbsp;|&nbsp; Data powered by Supabase
+  Teradyne ROI Hub OS &copy; 2026 &nbsp;|&nbsp; Portfolio Dashboard v2.0 &nbsp;|&nbsp; Data powered by Supabase
 </footer>
 
 <script>
-var supabaseClient = null;
-var hubRegistry = [];
-var hubSnapshots = {};
-var hubMeta = {};
-var currentScenario = 'most_likely';
-var debugLog = [];
 
-/* Column candidates for snapshot data */
-var NPV_COLS = ['npv','net_present_value','NPV'];
-var IRR_COLS = ['irr','internal_rate_of_return','IRR'];
-var DEV_COLS = ['total_dev_cost','dev_cost','total_development_cost','eng_total','total_nre','nre_cost'];
-var REV_COLS = ['total_revenue','revenue','annual_revenue','cumulative_revenue','total_rev'];
+var sb=null,registry=[],hubData={},scenario='mid',dlog=[];
+var SNAME={low:'Low',mid:'Most Likely',high:'High'};
 
-/* ── Debug ── */
-function dbg(msg){
-  var ts=new Date().toLocaleTimeString();
-  var line='['+ts+'] '+msg;
-  console.log(line);
-  debugLog.push(line);
-  var el=document.getElementById('debugBanner');
-  if(el) el.textContent=debugLog.join('\n');
+function getMetrics(snap,sc){
+  if(!snap||!snap.metadata)return null;
+  var meta=typeof snap.metadata==='string'?JSON.parse(snap.metadata):snap.metadata;
+  if(!meta||!meta.computed_metrics)return null;
+  return meta.computed_metrics[sc]||null;
 }
+
+function getDevCost(snap){
+  if(!snap||!snap.dev_costs)return null;
+  var dc=typeof snap.dev_costs==='string'?JSON.parse(snap.dev_costs):snap.dev_costs;
+  if(!dc)return null;
+  var arr=dc['Eng Total Cost'];
+  if(!arr||!Array.isArray(arr))return null;
+  var sum=0;for(var i=0;i<arr.length;i++)sum+=(parseFloat(arr[i])||0);
+  return sum;
+}
+
+function getOwner(h){
+  if(h.reg&&h.reg.owner)return h.reg.owner;
+  if(h.snap&&h.snap.metadata){
+    var m=typeof h.snap.metadata==='string'?JSON.parse(h.snap.metadata):h.snap.metadata;
+    if(m&&m.owner)return m.owner;
+  }
+  return '\u2014';
+}
+
+function fmtUSD(v){
+  if(v===null||v===undefined||isNaN(v))return'\u2014';
+  var neg=v<0;var a=Math.abs(v);
+  if(a>=1e9)return(neg?'-':'')+'$'+(a/1e9).toFixed(2)+'B';
+  if(a>=1e6)return(neg?'-':'')+'$'+(a/1e6).toFixed(2)+'M';
+  if(a>=1e3)return(neg?'-':'')+'$'+(a/1e3).toFixed(0)+'K';
+  return(neg?'-':'')+'$'+a.toFixed(0);
+}
+
+function fmtIRR(v){
+  if(v===null||v===undefined||isNaN(v))return'\u2014';
+  return(v*100).toFixed(1)+'%';
+}
+
+function fmtDate(d){
+  if(!d)return'\u2014';
+  return new Date(d).toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'});
+}
+
+function dbg(m){var t=new Date().toLocaleTimeString();var l='['+t+'] '+m;console.log(l);dlog.push(l);var e=document.getElementById('debugBanner');if(e)e.textContent=dlog.join('\n')}
 function toggleDebug(){document.getElementById('debugBanner').classList.toggle('visible')}
 
-/* ── Column helpers ── */
-function resolveCol(row,candidates){
-  if(!row)return null;
-  for(var i=0;i<candidates.length;i++){
-    if(row[candidates[i]]!==undefined&&row[candidates[i]]!==null&&row[candidates[i]]!=='')return candidates[i];
-  }
-  return null;
-}
-function getVal(row,candidates,def){
-  if(!row)return def;
-  for(var i=0;i<candidates.length;i++){
-    if(row[candidates[i]]!==undefined&&row[candidates[i]]!==null){
-      var v=parseFloat(row[candidates[i]]);
-      return isNaN(v)?def:v;
-    }
-  }
-  return def;
-}
+document.addEventListener('DOMContentLoaded',function(){initSB()});
 
-/* ── Init ── */
-document.addEventListener('DOMContentLoaded',function(){initSupabase()});
-
-function initSupabase(){
+function initSB(){
   var raw=localStorage.getItem('roiStudioConfig');
-  var config=null;
-  try{config=JSON.parse(raw)}catch(e){}
-  if(!config||!config.supabaseUrl||!config.supabaseAnonKey){
+  var cfg=null;try{cfg=JSON.parse(raw)}catch(e){}
+  if(!cfg||!cfg.supabaseUrl||!cfg.supabaseAnonKey){
     document.getElementById('configBanner').classList.add('visible');
-    showEmpty('Configure Supabase connection above to load portfolio data.');
-    dbg('No config in localStorage "roiStudioConfig"');
-    return;
+    showEmpty('Configure Supabase above to load data.');
+    dbg('No config found');return;
   }
   try{
-    supabaseClient=supabase.createClient(config.supabaseUrl,config.supabaseAnonKey);
+    sb=supabase.createClient(cfg.supabaseUrl,cfg.supabaseAnonKey);
     document.getElementById('configBanner').classList.remove('visible');
-    dbg('Supabase connected: '+config.supabaseUrl);
+    dbg('Connected: '+cfg.supabaseUrl);
     loadPortfolio();
-  }catch(e){
-    showError('Init failed: '+e.message);
-    dbg('ERROR init: '+e.message);
-  }
+  }catch(e){showError('Init: '+e.message);dbg('ERROR: '+e.message)}
 }
+
 function saveConfig(){
   var u=document.getElementById('cfgUrl').value.trim();
   var k=document.getElementById('cfgKey').value.trim();
   if(!u||!k){alert('Fill both fields.');return}
   localStorage.setItem('roiStudioConfig',JSON.stringify({supabaseUrl:u,supabaseAnonKey:k}));
-  initSupabase();
+  initSB();
 }
 
-/* ── Load Portfolio ── */
 async function loadPortfolio(){
-  if(!supabaseClient){initSupabase();return}
-  showLoading();clearError();debugLog=[];
+  if(!sb){initSB();return}
+  showLoading();clearError();dlog=[];
   dbg('=== Loading Portfolio ===');
-
   try{
-    var res=await supabaseClient.from('roi_hub_registry').select('*').order('created_at',{ascending:true});
-    if(res.error) throw res.error;
-    hubRegistry=res.data||[];
-
-    dbg('Registry rows: '+hubRegistry.length);
-    if(hubRegistry.length>0){
-      dbg('Columns: '+Object.keys(hubRegistry[0]).join(', '));
-      dbg('First row: '+JSON.stringify(hubRegistry[0],null,2));
+    var r=await sb.from('roi_hub_registry').select('*').order('created_at',{ascending:true});
+    if(r.error)throw r.error;
+    registry=r.data||[];
+    dbg('Registry: '+registry.length+' hubs');
+    hubData={};
+    for(var i=0;i<registry.length;i++){
+      var reg=registry[i];
+      var tbl=reg.db_table;
+      if(!tbl){dbg('SKIP: no db_table for '+reg.hub_name);continue}
+      dbg('Hub: "'+reg.hub_name+'" -> '+tbl);
+      var snap=await sb.from(tbl).select('*').order('created_at',{ascending:false}).limit(1);
+      if(snap.error){dbg('  ERROR: '+snap.error.message);hubData[tbl]={reg:reg,snap:null};continue}
+      if(!snap.data||snap.data.length===0){dbg('  Empty table');hubData[tbl]={reg:reg,snap:null};continue}
+      var row=snap.data[0];
+      hubData[tbl]={reg:reg,snap:row};
+      var m=getMetrics(row,'mid');
+      if(m)dbg('  mid: NPV='+fmtUSD(m.npv)+' IRR='+fmtIRR(m.irr)+' '+m.go_nogo);
+      else dbg('  No computed_metrics');
+      dbg('  Dev Cost: '+fmtUSD(getDevCost(row)));
     }
-
-    hubMeta={};hubSnapshots={};
-
-    /* Column resolution: db_table FIRST (contains actual Supabase table name) */
-    var keyColCandidates=['db_table','hub_key','table_name','table_prefix','hub_id','hub_short'];
-    var nameColCandidates=['hub_name','product_name','name','title','display_name'];
-    var urlColCandidates=['hub_url','url','link','product_url','dashboard_url'];
-
-    var keyCol=hubRegistry.length>0?resolveCol(hubRegistry[0],keyColCandidates):null;
-    var nameCol=hubRegistry.length>0?resolveCol(hubRegistry[0],nameColCandidates):null;
-    var urlCol=hubRegistry.length>0?resolveCol(hubRegistry[0],urlColCandidates):null;
-
-    dbg('Resolved -> keyCol: "'+keyCol+'", nameCol: "'+nameCol+'", urlCol: "'+urlCol+'"');
-
-    var scenarios=['low','most_likely','high'];
-
-    for(var h=0;h<hubRegistry.length;h++){
-      var hub=hubRegistry[h];
-
-      /* Resolve table name */
-      var rawKey=keyCol?hub[keyCol]:null;
-      if(!rawKey){
-        var fn=hub.hub_name||hub.product_name||hub.name||hub.title||String(hub.id||'');
-        rawKey=fn.toLowerCase().replace(/[^a-z0-9]+/g,'_').replace(/^_+|_+$/g,'');
-      }
-      if(!rawKey){dbg('SKIP hub, no key: '+JSON.stringify(hub));continue}
-
-      /* db_table = exact table name; others need _roi suffix */
-      var tableName;
-      if(keyCol==='db_table'){
-        tableName=rawKey;
-      }else{
-        tableName=rawKey.endsWith('_roi')?rawKey:rawKey+'_roi';
-      }
-
-      var hubName=nameCol?(hub[nameCol]||rawKey):rawKey;
-      var hubUrl=urlCol?(hub[urlCol]||'#'):'#';
-
-      hubMeta[rawKey]={name:hubName,url:hubUrl,key:rawKey,tableName:tableName,raw:hub};
-      hubSnapshots[rawKey]={};
-
-      dbg('Hub: "'+hubName+'" -> table: "'+tableName+'"');
-
-      /*
-       * PROBE-FIRST STRATEGY:
-       * 1) Fetch latest row WITHOUT scenario filter
-       * 2) Check if returned row has a "scenario" column
-       * 3) If yes: re-fetch per scenario
-       * 4) If no:  use same latest row for all scenarios
-       */
-      try{
-        /* Step 1: Probe — fetch latest row, no filter */
-        var probe=await supabaseClient.from(tableName).select('*').order('created_at',{ascending:false}).limit(1);
-
-        if(probe.error){
-          dbg('  Table "'+tableName+'" error: '+probe.error.message);
-          hubSnapshots[rawKey].low=null;
-          hubSnapshots[rawKey].most_likely=null;
-          hubSnapshots[rawKey].high=null;
-          continue;
-        }
-
-        if(!probe.data||probe.data.length===0){
-          dbg('  Table "'+tableName+'" exists but is empty');
-          hubSnapshots[rawKey].low=null;
-          hubSnapshots[rawKey].most_likely=null;
-          hubSnapshots[rawKey].high=null;
-          continue;
-        }
-
-        var sampleRow=probe.data[0];
-        var sampleCols=Object.keys(sampleRow);
-        dbg('  Table columns: '+sampleCols.join(', '));
-
-        /* Step 2: Check if "scenario" column exists */
-        var hasScenario=sampleCols.indexOf('scenario')>=0;
-
-        if(hasScenario){
-          dbg('  Has "scenario" column — fetching per scenario');
-          /* Step 3: Fetch per scenario */
-          for(var s=0;s<scenarios.length;s++){
-            var sc=scenarios[s];
-            var qr=await supabaseClient.from(tableName).select('*').eq('scenario',sc).order('created_at',{ascending:false}).limit(1);
-            if(!qr.error&&qr.data&&qr.data.length>0){
-              hubSnapshots[rawKey][sc]=qr.data[0];
-              dbg('  ['+sc+'] OK');
-            }else{
-              hubSnapshots[rawKey][sc]=null;
-              dbg('  ['+sc+'] No data'+(qr.error?' — '+qr.error.message:''));
-            }
-          }
-        }else{
-          /* Step 4: No scenario column — use latest row for all */
-          dbg('  No "scenario" column — using latest row for all scenarios');
-          hubSnapshots[rawKey].low=sampleRow;
-          hubSnapshots[rawKey].most_likely=sampleRow;
-          hubSnapshots[rawKey].high=sampleRow;
-        }
-
-      }catch(e){
-        dbg('  Exception for "'+tableName+'": '+(e.message||e));
-        hubSnapshots[rawKey].low=null;
-        hubSnapshots[rawKey].most_likely=null;
-        hubSnapshots[rawKey].high=null;
-      }
-    }
-
     dbg('=== Load Complete ===');
     document.getElementById('lastUpdated').textContent='Updated: '+new Date().toLocaleTimeString();
     renderAll();
-  }catch(err){
-    showError('Load error: '+(err.message||err));
-    showEmpty('Failed to load. Check Supabase config.');
-    dbg('FATAL: '+(err.message||err));
+  }catch(e){
+    showError('Load: '+(e.message||e));
+    showEmpty('Failed. Check config.');
+    dbg('FATAL: '+(e.message||e));
   }
 }
 
-/* ── Render ── */
 function renderAll(){renderKPIs();renderHubs()}
 
 function renderKPIs(){
-  var keys=Object.keys(hubMeta);
-  var tNPV=0,tDev=0,tRev=0,irrs=[],active=0;
+  var keys=Object.keys(hubData);
+  var tNPV=0,tDev=0,tRev=0,irrs=[],active=0,goC=0,nogoC=0;
   for(var i=0;i<keys.length;i++){
-    var snap=hubSnapshots[keys[i]]?hubSnapshots[keys[i]][currentScenario]:null;
-    if(!snap) continue;
-    active++;
-    tNPV+=getVal(snap,NPV_COLS,0);
-    tDev+=getVal(snap,DEV_COLS,0);
-    tRev+=getVal(snap,REV_COLS,0);
-    var ir=getVal(snap,IRR_COLS,null);
-    if(ir!==null) irrs.push(ir);
+    var h=hubData[keys[i]];if(!h.snap)continue;
+    var m=getMetrics(h.snap,scenario);var dc=getDevCost(h.snap);
+    if(!m)continue;active++;
+    tNPV+=(m.npv||0);tRev+=(m.rev_total||0);
+    if(dc!==null)tDev+=dc;
+    if(m.irr!==null&&m.irr!==undefined)irrs.push(m.irr);
+    if(m.go_nogo==='go')goC++;
+    if(m.go_nogo==='nogo')nogoC++;
   }
   var avgIRR=irrs.length?irrs.reduce(function(a,b){return a+b},0)/irrs.length:0;
-
   var kpis=[
-    {l:'Total Portfolio NPV',u:'$(USD)',v:tNPV,f:'$',c:true},
-    {l:'Weighted Avg IRR',u:'%',v:avgIRR,f:'%',c:true},
-    {l:'Total Dev Cost',u:'$(USD)',v:tDev,f:'$',c:false},
-    {l:'Total Revenue',u:'$(USD)',v:tRev,f:'$',c:false},
-    {l:'Active Hubs',u:'',v:active,f:'n',c:false}
+    {l:'Total Portfolio NPV',u:'$(USD)',v:tNPV,f:'usd',c:true},
+    {l:'Avg IRR',u:'%',v:avgIRR,f:'irr',c:true},
+    {l:'Total Dev Investment',u:'$(USD)',v:tDev,f:'usd',c:false},
+    {l:'Total Revenue',u:'$(USD)',v:tRev,f:'usd',c:false},
+    {l:'GO / NO-GO',u:'',v:goC+' / '+nogoC,f:'txt',c:false}
   ];
-
   var html='';
   for(var j=0;j<kpis.length;j++){
-    var k=kpis[j];
-    var dv,cc='';
-    if(k.f==='$'){dv='$'+fmtNum(k.v,2);if(k.c)cc=k.v>0?'positive':k.v<0?'negative':''}
-    else if(k.f==='%'){dv=fmtNum(k.v,1)+'%';if(k.c)cc=k.v>0?'positive':k.v<0?'negative':''}
+    var k=kpis[j];var dv,cc='';
+    if(k.f==='usd'){dv=fmtUSD(k.v);if(k.c)cc=k.v>0?'positive':k.v<0?'negative':''}
+    else if(k.f==='irr'){dv=fmtIRR(k.v);if(k.c)cc=k.v>0?'positive':k.v<0?'negative':''}
     else{dv=k.v}
-    html+='<div class="kpi-card"><div class="kpi-label">'+k.l+' '+(k.u?'<span class="kpi-unit">'+k.u+'</span>':'')+'</div><div class="kpi-value '+cc+'">'+dv+'</div><div class="kpi-sub">Scenario: '+sceneName(currentScenario)+'</div></div>';
+    html+='<div class="kpi-card"><div class="kpi-label">'+k.l+' '+(k.u?'<span class="kpi-unit">'+k.u+'</span>':'')+'</div><div class="kpi-value '+cc+'">'+dv+'</div><div class="kpi-sub">Scenario: '+SNAME[scenario]+'</div></div>';
   }
   document.getElementById('portfolioKPIs').innerHTML=html;
 }
 
 function renderHubs(){
-  var keys=Object.keys(hubMeta);
+  var keys=Object.keys(hubData);
   document.getElementById('hubCount').textContent=keys.length+' hub'+(keys.length!==1?'s':'');
   var container=document.getElementById('hubContainer');
-
-  if(keys.length===0){
-    container.innerHTML='<div class="empty-state"><div class="icon">&#x1F4ED;</div><p>No ROI Hubs found.</p></div>';
-    return;
-  }
-
+  if(keys.length===0){container.innerHTML='<div class="empty-state"><div class="icon">&#x1F4ED;</div><p>No hubs found.</p></div>';return}
   var html='<div class="hub-grid">';
   for(var i=0;i<keys.length;i++){
-    var meta=hubMeta[keys[i]];
-    var snap=hubSnapshots[keys[i]]?hubSnapshots[keys[i]][currentScenario]:null;
-    var npv=snap?getVal(snap,NPV_COLS,null):null;
-    var irr=snap?getVal(snap,IRR_COLS,null):null;
-    var dev=snap?getVal(snap,DEV_COLS,null):null;
-    var dot=npv===null?'orange':npv>0?'green':npv<0?'red':'orange';
-    var u=meta.url||'#';
-    var nm=esc(meta.name||keys[i]);
-
-    html+='<div class="hub-card" onclick="window.open(\''+u.replace(/'/g,"\\\'")+'\',\'_blank\')">';
-    html+='<div class="hub-card-header"><div class="hub-card-title"><span class="status-dot '+dot+'"></span>'+nm+'</div>';
-    html+='<a class="hub-card-link" href="'+esc(u)+'" target="_blank" onclick="event.stopPropagation()">Open Hub &rarr;</a></div>';
+    var h=hubData[keys[i]];var reg=h.reg;var snap=h.snap;
+    var m=snap?getMetrics(snap,scenario):null;
+    var dc=snap?getDevCost(snap):null;
+    var npv=m?m.npv:null;var irr=m?m.irr:null;
+    var gng=m?(m.go_nogo||'pending'):'pending';
+    var owner=getOwner(h);
+    var url=reg.hub_url||'#';
+    html+='<div class="hub-card '+gng+'">';
+    html+='<div class="hub-card-header"><div class="hub-card-title-area">';
+    html+='<div class="hub-card-title">'+esc(reg.hub_name||keys[i])+'</div>';
+    html+='<div class="hub-card-sub"><span>'+esc(reg.bu||'')+'</span> &middot; <span>'+esc(reg.product_code||'')+'</span> &middot; <span>'+esc(reg.phase||'')+'</span></div>';
+    html+='</div>';
+    html+='<span class="status-badge '+gng+'">'+(gng==='go'?'&#x25CF; GO':gng==='nogo'?'&#x25CF; NO-GO':gng==='caution'?'&#x25CF; CAUTION':'&#x25CF; PENDING')+'</span>';
+    html+='</div>';
     html+='<div class="hub-card-body">';
-
-    if(snap){
+    if(m){
       html+='<div class="hub-kpi-row">';
-      html+='<div class="hub-kpi"><div class="hub-kpi-label">NPV</div><div class="hub-kpi-value" style="color:'+(npv>0?'var(--green)':npv<0?'var(--red)':'var(--text-primary)')+'">$'+fmtNum(npv!==null?npv:0,2)+'</div><span class="hub-kpi-unit">$(USD)</span></div>';
-      html+='<div class="hub-kpi"><div class="hub-kpi-label">IRR</div><div class="hub-kpi-value" style="color:'+(irr>0?'var(--green)':irr<0?'var(--red)':'var(--text-primary)')+'">'+(irr!==null?fmtNum(irr,1)+'%':'\u2014')+'</div><span class="hub-kpi-unit">%</span></div>';
-      html+='<div class="hub-kpi"><div class="hub-kpi-label">Dev Cost</div><div class="hub-kpi-value">$'+(dev!==null?fmtNum(dev,2):'\u2014')+'</div><span class="hub-kpi-unit">$(USD)</span></div>';
+      html+='<div class="hub-kpi"><div class="hub-kpi-label">NPV</div><div class="hub-kpi-value" style="color:'+(npv>0?'var(--green)':npv<0?'var(--red)':'var(--text-primary)')+'">'+fmtUSD(npv)+'</div><span class="hub-kpi-unit">$(USD)</span></div>';
+      html+='<div class="hub-kpi"><div class="hub-kpi-label">IRR</div><div class="hub-kpi-value" style="color:'+(irr>0.12?'var(--green)':irr<0?'var(--red)':'var(--text-primary)')+'">'+fmtIRR(irr)+'</div><span class="hub-kpi-unit">%</span></div>';
+      html+='<div class="hub-kpi"><div class="hub-kpi-label">DEV COST</div><div class="hub-kpi-value">'+fmtUSD(dc)+'</div><span class="hub-kpi-unit">$(USD)</span></div>';
       html+='</div>';
     }else{
-      html+='<div style="text-align:center;padding:12px;color:var(--text-muted);font-size:.8rem">No data for <strong>'+sceneName(currentScenario)+'</strong></div>';
+      html+='<div style="text-align:center;padding:14px;color:var(--text-muted);font-size:.8rem">No data for '+SNAME[scenario]+'</div>';
     }
+    html+='</div>';
+    html+='<div class="hub-card-footer">';
+    html+='<div class="hub-card-meta"><span>&#x1F464; '+esc(owner)+'</span><span>&#x1F4C5; '+fmtDate(snap?snap.updated_at:null)+'</span></div>';
+    html+='<a class="hub-open-link" href="'+esc(url)+'" target="_blank" onclick="event.stopPropagation()">&#x1F517; Open Hub</a>';
     html+='</div></div>';
   }
   html+='</div>';
   container.innerHTML=html;
 }
 
-/* ── Scenario Switch ── */
 function switchScenario(sc){
-  currentScenario=sc;
+  scenario=sc;
   document.querySelectorAll('.scenario-tab').forEach(function(t){t.classList.toggle('active',t.dataset.scenario===sc)});
-  dbg('Scenario -> '+sceneName(sc));
+  dbg('Scenario -> '+SNAME[sc]);
   renderAll();
 }
 
-/* ── Portfolio AI ── */
 function toggleAI(){
   document.getElementById('aiPanel').classList.toggle('open');
   document.getElementById('mainContent').classList.toggle('ai-open');
 }
-function sendAIMessage(){
+
+function sendAI(){
   var inp=document.getElementById('aiInput');
   var txt=inp.value.trim();if(!txt)return;inp.value='';
   var ma=document.getElementById('aiMessages');
@@ -509,46 +418,58 @@ function sendAIMessage(){
   ma.scrollTop=ma.scrollHeight;
   setTimeout(function(){var el=document.getElementById(tid);if(el)el.innerHTML=aiReply(txt);ma.scrollTop=ma.scrollHeight},1200);
 }
+
 function aiReply(q){
-  var ql=q.toLowerCase(),keys=Object.keys(hubMeta);
-  var tN=0,tD=0,tR=0,irs=[],ct=0;
+  var ql=q.toLowerCase(),keys=Object.keys(hubData);
+  var stats=[];
   for(var i=0;i<keys.length;i++){
-    var sn=hubSnapshots[keys[i]]?hubSnapshots[keys[i]][currentScenario]:null;
-    if(!sn)continue;ct++;
-    tN+=getVal(sn,NPV_COLS,0);tD+=getVal(sn,DEV_COLS,0);tR+=getVal(sn,REV_COLS,0);
-    irs.push(getVal(sn,IRR_COLS,0));
+    var h=hubData[keys[i]];if(!h.snap)continue;
+    var m=getMetrics(h.snap,scenario);if(!m)continue;
+    stats.push({name:h.reg.hub_name,npv:m.npv||0,irr:m.irr||0,rev:m.rev_total||0,gng:m.go_nogo,dev:getDevCost(h.snap)||0});
   }
-  var ai=irs.length?irs.reduce(function(a,b){return a+b},0)/irs.length:0;
+  var tN=0,tD=0,tR=0,irs=[];
+  stats.forEach(function(s){tN+=s.npv;tD+=s.dev;tR+=s.rev;irs.push(s.irr)});
+  var aI=irs.length?irs.reduce(function(a,b){return a+b},0)/irs.length:0;
 
   if(ql.indexOf('summary')>=0||ql.indexOf('overview')>=0||ql.indexOf('portfolio')>=0){
-    return '&#x1F4CA; <strong>'+sceneName(currentScenario)+' Summary</strong><br><br>&bull; Hubs: <strong>'+ct+'</strong><br>&bull; NPV: <strong>$'+fmtNum(tN,2)+'</strong><br>&bull; IRR: <strong>'+fmtNum(ai,1)+'%</strong><br>&bull; Dev Cost: <strong>$'+fmtNum(tD,2)+'</strong><br>&bull; Revenue: <strong>$'+fmtNum(tR,2)+'</strong>';
+    return '&#x1F4CA; <strong>'+SNAME[scenario]+' Portfolio Summary</strong><br><br>'+
+      '&bull; Active Hubs: <strong>'+stats.length+'</strong><br>'+
+      '&bull; Total NPV: <strong>'+fmtUSD(tN)+'</strong><br>'+
+      '&bull; Avg IRR: <strong>'+fmtIRR(aI)+'</strong><br>'+
+      '&bull; Total Dev Cost: <strong>'+fmtUSD(tD)+'</strong><br>'+
+      '&bull; Total Revenue: <strong>'+fmtUSD(tR)+'</strong><br><br>'+
+      stats.map(function(s){return '<strong>'+esc(s.name)+'</strong>: NPV '+fmtUSD(s.npv)+' | IRR '+fmtIRR(s.irr)+' | '+s.gng.toUpperCase()}).join('<br>');
   }
-  if(ql.indexOf('best')>=0||ql.indexOf('top')>=0){
-    var b=null,bn=-Infinity;
-    for(var j=0;j<keys.length;j++){var s=hubSnapshots[keys[j]]?hubSnapshots[keys[j]][currentScenario]:null;if(!s)continue;var n=getVal(s,NPV_COLS,-Infinity);if(n>bn){bn=n;b=hubMeta[keys[j]]}}
-    if(b) return '&#x1F3C6; Top hub: <strong>'+esc(b.name)+'</strong> — NPV $'+fmtNum(bn,2);
+  if(ql.indexOf('compare')>=0||ql.indexOf('scenario')>=0){
+    var rows='';var scs=['low','mid','high'];
+    for(var j=0;j<keys.length;j++){
+      var h2=hubData[keys[j]];if(!h2.snap)continue;
+      rows+='<br><strong>'+esc(h2.reg.hub_name)+'</strong><br>';
+      for(var s2=0;s2<scs.length;s2++){
+        var m2=getMetrics(h2.snap,scs[s2]);
+        rows+='&nbsp;&nbsp;'+SNAME[scs[s2]]+': NPV '+(m2?fmtUSD(m2.npv):'\u2014')+' | IRR '+(m2?fmtIRR(m2.irr):'\u2014')+'<br>';
+      }
+    }
+    return '&#x1F4CA; <strong>Scenario Comparison</strong>'+rows;
   }
-  if(ql.indexOf('risk')>=0||ql.indexOf('negative')>=0){
-    var neg=[];
-    for(var k=0;k<keys.length;k++){var ss=hubSnapshots[keys[k]]?hubSnapshots[keys[k]][currentScenario]:null;if(ss&&getVal(ss,NPV_COLS,0)<0)neg.push(hubMeta[keys[k]].name)}
-    if(neg.length)return '&#x26A0; '+neg.length+' hub(s) negative NPV: '+neg.map(function(n){return '<strong>'+esc(n)+'</strong>'}).join(', ');
-    return '&#x2705; All hubs positive under '+sceneName(currentScenario);
+  if(ql.indexOf('best')>=0||ql.indexOf('top')>=0||ql.indexOf('winner')>=0){
+    var best=null;
+    stats.forEach(function(s){if(!best||s.npv>best.npv)best=s});
+    if(best)return '&#x1F3C6; Top hub: <strong>'+esc(best.name)+'</strong> with NPV '+fmtUSD(best.npv)+' and IRR '+fmtIRR(best.irr);
+  }
+  if(ql.indexOf('risk')>=0||ql.indexOf('negative')>=0||ql.indexOf('nogo')>=0||ql.indexOf('no-go')>=0){
+    var neg=stats.filter(function(s){return s.npv<0});
+    if(neg.length)return '&#x26A0; <strong>'+neg.length+'</strong> hub(s) with negative NPV:<br>'+neg.map(function(s){return '&bull; <strong>'+esc(s.name)+'</strong>: '+fmtUSD(s.npv)}).join('<br>');
+    return '&#x2705; All hubs positive under '+SNAME[scenario];
   }
   if(ql.indexOf('debug')>=0||ql.indexOf('schema')>=0){
-    var info='&#x1F41E; <strong>Schema Debug</strong><br>';
-    for(var d=0;d<keys.length;d++){
-      var ds=hubSnapshots[keys[d]]?hubSnapshots[keys[d]][currentScenario]:null;
-      info+='<br><strong>'+esc(hubMeta[keys[d]].name)+'</strong> ('+hubMeta[keys[d]].tableName+')<br>';
-      info+=ds?'Cols: '+Object.keys(ds).join(', ')+'<br>':'No data<br>';
-    }
+    var info='&#x1F41E; <strong>Data Debug</strong><br>';
+    keys.forEach(function(k){var h3=hubData[k];info+='<br><strong>'+esc(h3.reg.hub_name)+'</strong> ('+k+')<br>';if(h3.snap){info+='Cols: '+Object.keys(h3.snap).join(', ')+'<br>';var cm=h3.snap.metadata?h3.snap.metadata.computed_metrics:null;info+='computed_metrics: '+(cm?'YES - '+Object.keys(cm).join(', '):'NO')+'<br>'}else info+='No snapshot<br>'});
     return info;
   }
-  return '&#x1F916; '+sceneName(currentScenario)+': <strong>'+ct+'</strong> hubs | NPV $'+fmtNum(tN,2)+' | IRR '+fmtNum(ai,1)+'%<br><br><em>Try: "summary", "top performer", "risk", "debug schema"</em>';
+  return '&#x1F916; <strong>'+SNAME[scenario]+'</strong>: '+stats.length+' hubs | NPV '+fmtUSD(tN)+' | IRR '+fmtIRR(aI)+'<br><br><em>Try: "portfolio summary", "compare scenarios", "top performer", "risk analysis", "debug"</em>';
 }
 
-/* ── Utilities ── */
-function fmtNum(n,d){if(n===null||n===undefined||isNaN(n))return'\u2014';return Number(n).toLocaleString('en-US',{minimumFractionDigits:d,maximumFractionDigits:d})}
-function sceneName(s){return{low:'Low',most_likely:'Most Likely',high:'High'}[s]||s}
 function esc(s){if(!s)return'';var d=document.createElement('div');d.appendChild(document.createTextNode(s));return d.innerHTML}
 function showLoading(){
   document.getElementById('hubContainer').innerHTML='<div class="loading-overlay"><div class="spinner"></div><div class="loading-text">Loading from Supabase...</div></div>';
@@ -558,6 +479,7 @@ function showLoading(){
 function showEmpty(m){document.getElementById('hubContainer').innerHTML='<div class="empty-state"><div class="icon">&#x1F50C;</div><p>'+m+'</p></div>'}
 function showError(m){document.getElementById('errorContainer').innerHTML='<div class="error-msg">&#x26D4; '+esc(m)+'</div>'}
 function clearError(){document.getElementById('errorContainer').innerHTML=''}
+
 </script>
 </body>
 </html>
