@@ -6,7 +6,6 @@
 <title>ROI Portfolio Dashboard — Teradyne ROI Hub OS</title>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
 <style>
-/* ── Reset & Base ────────────────────────────────────── */
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 :root{
   --bg-primary:#1a1a2e;--bg-secondary:#16213e;--bg-card:#0f3460;
@@ -19,126 +18,59 @@
 html{font-size:14px}
 body{font-family:'Segoe UI',system-ui,-apple-system,sans-serif;background:var(--bg-primary);color:var(--text-primary);min-height:100vh;display:flex;flex-direction:column}
 a{color:var(--accent);text-decoration:none}a:hover{text-decoration:underline}
-
-/* ── Scrollbar ───────────────────────────────────────── */
 ::-webkit-scrollbar{width:6px}
 ::-webkit-scrollbar-track{background:var(--bg-secondary)}
 ::-webkit-scrollbar-thumb{background:var(--accent);border-radius:3px}
-
-/* ── Header ──────────────────────────────────────────── */
-.header{
-  display:flex;align-items:center;justify-content:space-between;
-  padding:16px 32px;background:var(--bg-secondary);border-bottom:1px solid var(--border);
-  position:sticky;top:0;z-index:100;
-}
+.header{display:flex;align-items:center;justify-content:space-between;padding:16px 32px;background:var(--bg-secondary);border-bottom:1px solid var(--border);position:sticky;top:0;z-index:100}
 .header-left{display:flex;align-items:center;gap:16px}
 .logo{font-size:1.6rem;font-weight:800;color:var(--accent);letter-spacing:-.5px}
 .logo span{color:var(--text-primary);font-weight:400}
 .header-title{font-size:1.15rem;color:var(--text-secondary);border-left:2px solid var(--border);padding-left:16px}
 .header-right{display:flex;align-items:center;gap:12px}
-.btn{
-  display:inline-flex;align-items:center;gap:6px;padding:8px 18px;
-  border-radius:8px;font-size:.85rem;font-weight:600;cursor:pointer;
-  border:none;transition:var(--transition);
-}
+.btn{display:inline-flex;align-items:center;gap:6px;padding:8px 18px;border-radius:8px;font-size:.85rem;font-weight:600;cursor:pointer;border:none;transition:var(--transition)}
 .btn-accent{background:var(--accent);color:#fff}
 .btn-accent:hover{background:var(--accent-hover);transform:translateY(-1px)}
 .btn-ghost{background:transparent;color:var(--text-secondary);border:1px solid var(--border)}
 .btn-ghost:hover{border-color:var(--accent);color:var(--accent)}
-
-/* ── Layout ──────────────────────────────────────────── */
 .app-wrapper{display:flex;flex:1;overflow:hidden}
 .main-content{flex:1;overflow-y:auto;padding:28px 32px 80px;transition:var(--transition)}
 .main-content.ai-open{margin-right:380px}
-
-/* ── Config Banner ───────────────────────────────────── */
-.config-banner{
-  background:#2d1810;border:1px solid var(--accent);border-radius:var(--radius);
-  padding:20px 24px;margin-bottom:24px;display:none;
-}
+.config-banner{background:#2d1810;border:1px solid var(--accent);border-radius:var(--radius);padding:20px 24px;margin-bottom:24px;display:none}
 .config-banner.visible{display:block}
 .config-banner h3{color:var(--accent);margin-bottom:8px;font-size:1rem}
 .config-banner p{color:var(--text-secondary);font-size:.85rem;margin-bottom:14px}
 .config-form{display:flex;gap:10px;flex-wrap:wrap}
-.config-form input{
-  flex:1;min-width:200px;padding:8px 14px;border-radius:8px;border:1px solid var(--border);
-  background:var(--bg-primary);color:var(--text-primary);font-size:.85rem;
-}
+.config-form input{flex:1;min-width:200px;padding:8px 14px;border-radius:8px;border:1px solid var(--border);background:var(--bg-primary);color:var(--text-primary);font-size:.85rem}
 .config-form input::placeholder{color:var(--text-muted)}
-
-/* ── Debug Banner ────────────────────────────────────── */
-.debug-banner{
-  background:#1a2e1a;border:1px solid var(--green);border-radius:var(--radius);
-  padding:14px 20px;margin-bottom:20px;font-family:monospace;font-size:.75rem;
-  color:var(--green);max-height:200px;overflow-y:auto;display:none;white-space:pre-wrap;
-}
+.debug-banner{background:#1a2e1a;border:1px solid var(--green);border-radius:var(--radius);padding:14px 20px;margin-bottom:20px;font-family:monospace;font-size:.75rem;color:var(--green);max-height:250px;overflow-y:auto;display:none;white-space:pre-wrap}
 .debug-banner.visible{display:block}
-
-/* ── Scenario Tabs ───────────────────────────────────── */
 .controls-row{display:flex;align-items:center;justify-content:space-between;margin-bottom:24px;flex-wrap:wrap;gap:12px}
 .scenario-tabs{display:flex;gap:4px;background:var(--bg-secondary);padding:4px;border-radius:10px}
-.scenario-tab{
-  padding:10px 28px;border-radius:8px;font-size:.9rem;font-weight:600;
-  cursor:pointer;border:none;background:transparent;color:var(--text-muted);
-  transition:var(--transition);position:relative;
-}
+.scenario-tab{padding:10px 28px;border-radius:8px;font-size:.9rem;font-weight:600;cursor:pointer;border:none;background:transparent;color:var(--text-muted);transition:var(--transition);position:relative}
 .scenario-tab:hover{color:var(--text-primary)}
 .scenario-tab.active{background:var(--accent);color:#fff;box-shadow:0 2px 12px rgba(255,102,0,.35)}
-.scenario-tab .tab-badge{
-  position:absolute;top:-4px;right:-4px;width:8px;height:8px;
-  border-radius:50%;background:var(--green);display:none;
-}
+.scenario-tab .tab-badge{position:absolute;top:-4px;right:-4px;width:8px;height:8px;border-radius:50%;background:var(--green);display:none}
 .scenario-tab.active .tab-badge{display:block}
 .controls-right{display:flex;align-items:center;gap:10px}
 .last-updated{font-size:.75rem;color:var(--text-muted)}
-
-/* ── KPI Cards (Top Level) ───────────────────────────── */
-.kpi-grid{
-  display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));
-  gap:16px;margin-bottom:32px;
-}
-.kpi-card{
-  background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius);
-  padding:20px;position:relative;overflow:hidden;transition:var(--transition);
-}
+.kpi-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:16px;margin-bottom:32px}
+.kpi-card{background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius);padding:20px;position:relative;overflow:hidden;transition:var(--transition)}
 .kpi-card:hover{transform:translateY(-2px);box-shadow:var(--shadow);border-color:var(--accent)}
-.kpi-card::before{
-  content:'';position:absolute;top:0;left:0;right:0;height:3px;
-  background:linear-gradient(90deg,var(--accent),#ff8533);
-}
+.kpi-card::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,var(--accent),#ff8533)}
 .kpi-label{font-size:.75rem;color:var(--text-muted);text-transform:uppercase;letter-spacing:.8px;margin-bottom:6px;display:flex;align-items:center;gap:6px}
-.kpi-unit{
-  display:inline-block;padding:1px 6px;border-radius:4px;
-  background:rgba(255,102,0,.15);color:var(--accent);font-size:.65rem;font-weight:700;
-}
+.kpi-unit{display:inline-block;padding:1px 6px;border-radius:4px;background:rgba(255,102,0,.15);color:var(--accent);font-size:.65rem;font-weight:700}
 .kpi-value{font-size:1.65rem;font-weight:800;color:var(--text-primary);line-height:1.2}
 .kpi-value.positive{color:var(--green)}
 .kpi-value.negative{color:var(--red)}
 .kpi-sub{font-size:.7rem;color:var(--text-muted);margin-top:4px}
-
-/* ── Section Headers ─────────────────────────────────── */
 .section-header{display:flex;align-items:center;gap:10px;margin-bottom:18px}
 .section-header h2{font-size:1.15rem;font-weight:700}
 .section-header .line{flex:1;height:1px;background:var(--border)}
-.hub-count{
-  padding:2px 10px;border-radius:12px;background:rgba(255,102,0,.15);
-  color:var(--accent);font-size:.75rem;font-weight:700;
-}
-
-/* ── Product Hub Cards ───────────────────────────────── */
-.hub-grid{
-  display:grid;grid-template-columns:repeat(auto-fill,minmax(310px,1fr));
-  gap:18px;
-}
-.hub-card{
-  background:var(--bg-surface);border:1px solid var(--border);border-radius:var(--radius);
-  padding:0;overflow:hidden;transition:var(--transition);cursor:pointer;
-}
+.hub-count{padding:2px 10px;border-radius:12px;background:rgba(255,102,0,.15);color:var(--accent);font-size:.75rem;font-weight:700}
+.hub-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(310px,1fr));gap:18px}
+.hub-card{background:var(--bg-surface);border:1px solid var(--border);border-radius:var(--radius);padding:0;overflow:hidden;transition:var(--transition);cursor:pointer}
 .hub-card:hover{transform:translateY(-3px);box-shadow:var(--shadow);border-color:var(--accent)}
-.hub-card-header{
-  display:flex;align-items:center;justify-content:space-between;
-  padding:16px 20px 12px;border-bottom:1px solid rgba(255,255,255,.05);
-}
+.hub-card-header{display:flex;align-items:center;justify-content:space-between;padding:16px 20px 12px;border-bottom:1px solid rgba(255,255,255,.05)}
 .hub-card-title{font-size:1rem;font-weight:700;display:flex;align-items:center;gap:8px}
 .status-dot{width:9px;height:9px;border-radius:50%;flex-shrink:0}
 .status-dot.green{background:var(--green);box-shadow:0 0 8px rgba(72,187,120,.5)}
@@ -152,44 +84,23 @@ a{color:var(--accent);text-decoration:none}a:hover{text-decoration:underline}
 .hub-kpi-label{font-size:.65rem;color:var(--text-muted);text-transform:uppercase;letter-spacing:.5px;margin-bottom:4px}
 .hub-kpi-value{font-size:1.05rem;font-weight:700}
 .hub-kpi-unit{font-size:.55rem;color:var(--text-muted);display:block;margin-top:1px}
-
-/* ── Loading / Empty States ──────────────────────────── */
-.loading-overlay{
-  display:flex;flex-direction:column;align-items:center;justify-content:center;
-  padding:60px 20px;
-}
-.spinner{
-  width:40px;height:40px;border:3px solid var(--border);border-top-color:var(--accent);
-  border-radius:50%;animation:spin .8s linear infinite;margin-bottom:16px;
-}
+.loading-overlay{display:flex;flex-direction:column;align-items:center;justify-content:center;padding:60px 20px}
+.spinner{width:40px;height:40px;border:3px solid var(--border);border-top-color:var(--accent);border-radius:50%;animation:spin .8s linear infinite;margin-bottom:16px}
 @keyframes spin{to{transform:rotate(360deg)}}
 .loading-text{color:var(--text-muted);font-size:.85rem}
 .empty-state{text-align:center;padding:60px 20px;color:var(--text-muted)}
 .empty-state .icon{font-size:2.5rem;margin-bottom:12px}
 .error-msg{background:#2d1810;border:1px solid var(--red);border-radius:8px;padding:14px 18px;color:var(--red);font-size:.85rem;margin-bottom:16px}
-
-/* ── Portfolio AI Panel ──────────────────────────────── */
-.ai-panel{
-  position:fixed;top:0;right:-400px;width:380px;height:100vh;
-  background:var(--bg-secondary);border-left:1px solid var(--border);
-  display:flex;flex-direction:column;z-index:200;transition:right .35s cubic-bezier(.4,0,.2,1);
-  box-shadow:-8px 0 32px rgba(0,0,0,.4);
-}
+.ai-panel{position:fixed;top:0;right:-400px;width:380px;height:100vh;background:var(--bg-secondary);border-left:1px solid var(--border);display:flex;flex-direction:column;z-index:200;transition:right .35s cubic-bezier(.4,0,.2,1);box-shadow:-8px 0 32px rgba(0,0,0,.4)}
 .ai-panel.open{right:0}
-.ai-header{
-  display:flex;align-items:center;justify-content:space-between;
-  padding:16px 20px;border-bottom:1px solid var(--border);
-}
+.ai-header{display:flex;align-items:center;justify-content:space-between;padding:16px 20px;border-bottom:1px solid var(--border)}
 .ai-header h3{font-size:1rem;display:flex;align-items:center;gap:8px}
 .ai-header h3 .dot{width:8px;height:8px;border-radius:50%;background:var(--green);animation:pulse 2s infinite}
 @keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
 .ai-close{background:none;border:none;color:var(--text-muted);font-size:1.2rem;cursor:pointer}
 .ai-close:hover{color:var(--text-primary)}
 .ai-messages{flex:1;overflow-y:auto;padding:16px 20px;display:flex;flex-direction:column;gap:12px}
-.ai-msg{
-  max-width:88%;padding:10px 14px;border-radius:12px;font-size:.85rem;line-height:1.5;
-  animation:fadeUp .3s ease;
-}
+.ai-msg{max-width:88%;padding:10px 14px;border-radius:12px;font-size:.85rem;line-height:1.5;animation:fadeUp .3s ease}
 @keyframes fadeUp{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
 .ai-msg.system{background:var(--bg-card);color:var(--text-secondary);align-self:flex-start;border-bottom-left-radius:4px}
 .ai-msg.user{background:var(--accent);color:#fff;align-self:flex-end;border-bottom-right-radius:4px}
@@ -199,24 +110,11 @@ a{color:var(--accent);text-decoration:none}a:hover{text-decoration:underline}
 .ai-msg .typing span:nth-child(3){animation-delay:.4s}
 @keyframes typeDot{0%,60%,100%{opacity:.3;transform:translateY(0)}30%{opacity:1;transform:translateY(-4px)}}
 .ai-input-area{padding:14px 16px;border-top:1px solid var(--border);display:flex;gap:8px}
-.ai-input{
-  flex:1;padding:10px 14px;border-radius:8px;border:1px solid var(--border);
-  background:var(--bg-primary);color:var(--text-primary);font-size:.85rem;resize:none;
-}
+.ai-input{flex:1;padding:10px 14px;border-radius:8px;border:1px solid var(--border);background:var(--bg-primary);color:var(--text-primary);font-size:.85rem;resize:none}
 .ai-input:focus{outline:none;border-color:var(--accent)}
-.ai-send{
-  padding:10px 16px;border-radius:8px;background:var(--accent);color:#fff;
-  border:none;cursor:pointer;font-weight:700;font-size:.85rem;transition:var(--transition);
-}
+.ai-send{padding:10px 16px;border-radius:8px;background:var(--accent);color:#fff;border:none;cursor:pointer;font-weight:700;font-size:.85rem;transition:var(--transition)}
 .ai-send:hover{background:var(--accent-hover)}
-
-/* ── Footer ──────────────────────────────────────────── */
-.footer{
-  text-align:center;padding:16px;color:var(--text-muted);font-size:.7rem;
-  border-top:1px solid var(--border);background:var(--bg-secondary);
-}
-
-/* ── Responsive ──────────────────────────────────────── */
+.footer{text-align:center;padding:16px;color:var(--text-muted);font-size:.7rem;border-top:1px solid var(--border);background:var(--bg-secondary)}
 @media(max-width:768px){
   .header{padding:12px 16px;flex-wrap:wrap;gap:8px}
   .main-content{padding:16px}
@@ -230,7 +128,6 @@ a{color:var(--accent);text-decoration:none}a:hover{text-decoration:underline}
 </head>
 <body>
 
-<!-- HEADER -->
 <header class="header">
   <div class="header-left">
     <div class="logo">Teradyne<span> ROI Hub OS</span></div>
@@ -238,87 +135,58 @@ a{color:var(--accent);text-decoration:none}a:hover{text-decoration:underline}
   </div>
   <div class="header-right">
     <button class="btn btn-ghost" onclick="toggleDebug()">&#x1F41E; Debug</button>
-    <button class="btn btn-ghost" id="refreshBtn" onclick="loadPortfolio()" title="Refresh data">
-      &#x21bb; Refresh
-    </button>
-    <button class="btn btn-accent" id="aiToggle" onclick="toggleAI()">
-      &#x2728; Portfolio AI
-    </button>
+    <button class="btn btn-ghost" onclick="loadPortfolio()">&#x21bb; Refresh</button>
+    <button class="btn btn-accent" onclick="toggleAI()">&#x2728; Portfolio AI</button>
   </div>
 </header>
 
-<!-- MAIN -->
 <div class="app-wrapper">
   <div class="main-content" id="mainContent">
 
-    <!-- Config Banner -->
     <div class="config-banner" id="configBanner">
       <h3>&#x26A0; Supabase Connection Required</h3>
-      <p>Enter your Supabase credentials to connect the portfolio to your data. This will be saved in your browser's local storage.</p>
+      <p>Enter your Supabase credentials. Saved to browser local storage.</p>
       <div class="config-form">
-        <input id="cfgUrl" placeholder="Supabase URL  (https://xxxx.supabase.co)">
+        <input id="cfgUrl" placeholder="Supabase URL (https://xxxx.supabase.co)">
         <input id="cfgKey" placeholder="Supabase Anon Key">
         <button class="btn btn-accent" onclick="saveConfig()">Connect</button>
       </div>
     </div>
 
-    <!-- Debug Banner -->
     <div class="debug-banner" id="debugBanner"></div>
-
-    <!-- Error Container -->
     <div id="errorContainer"></div>
 
-    <!-- Scenario Tabs + Controls -->
     <div class="controls-row">
-      <div class="scenario-tabs" id="scenarioTabs">
-        <button class="scenario-tab" data-scenario="low" onclick="switchScenario('low')">
-          &#x1F4C9; Low
-          <span class="tab-badge"></span>
-        </button>
-        <button class="scenario-tab active" data-scenario="most_likely" onclick="switchScenario('most_likely')">
-          &#x1F3AF; Most Likely
-          <span class="tab-badge"></span>
-        </button>
-        <button class="scenario-tab" data-scenario="high" onclick="switchScenario('high')">
-          &#x1F4C8; High
-          <span class="tab-badge"></span>
-        </button>
+      <div class="scenario-tabs">
+        <button class="scenario-tab" data-scenario="low" onclick="switchScenario('low')">&#x1F4C9; Low<span class="tab-badge"></span></button>
+        <button class="scenario-tab active" data-scenario="most_likely" onclick="switchScenario('most_likely')">&#x1F3AF; Most Likely<span class="tab-badge"></span></button>
+        <button class="scenario-tab" data-scenario="high" onclick="switchScenario('high')">&#x1F4C8; High<span class="tab-badge"></span></button>
       </div>
       <div class="controls-right">
         <span class="last-updated" id="lastUpdated"></span>
       </div>
     </div>
 
-    <!-- Top-Level KPI Cards -->
     <div class="kpi-grid" id="portfolioKPIs"></div>
 
-    <!-- Hub Section -->
     <div class="section-header">
       <h2>&#x1F4E6; Product ROI Hubs</h2>
       <span class="hub-count" id="hubCount">0 hubs</span>
       <div class="line"></div>
     </div>
 
-    <!-- Hub Grid -->
     <div id="hubContainer">
-      <div class="loading-overlay" id="loadingState">
-        <div class="spinner"></div>
-        <div class="loading-text">Loading portfolio data from Supabase...</div>
-      </div>
+      <div class="loading-overlay"><div class="spinner"></div><div class="loading-text">Loading...</div></div>
     </div>
-
   </div>
 
-  <!-- AI PANEL -->
   <div class="ai-panel" id="aiPanel">
     <div class="ai-header">
       <h3><span class="dot"></span> Portfolio AI</h3>
       <button class="ai-close" onclick="toggleAI()">&times;</button>
     </div>
     <div class="ai-messages" id="aiMessages">
-      <div class="ai-msg system">
-        &#x1F44B; Hello! I'm <strong>Portfolio AI</strong>. I can help you analyze your ROI portfolio, compare scenarios, and surface insights. Ask me anything about your product investments!
-      </div>
+      <div class="ai-msg system">&#x1F44B; Hello! I'm <strong>Portfolio AI</strong>. Ask me about your ROI portfolio, compare scenarios, or surface insights!</div>
     </div>
     <div class="ai-input-area">
       <textarea class="ai-input" id="aiInput" rows="1" placeholder="Ask about your portfolio..." onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();sendAIMessage()}"></textarea>
@@ -327,518 +195,366 @@ a{color:var(--accent);text-decoration:none}a:hover{text-decoration:underline}
   </div>
 </div>
 
-<!-- FOOTER -->
 <footer class="footer">
-  Teradyne ROI Hub OS &copy; 2026 &nbsp;|&nbsp; Portfolio Dashboard v1.1 &nbsp;|&nbsp; Data powered by Supabase
+  Teradyne ROI Hub OS &copy; 2026 &nbsp;|&nbsp; Portfolio Dashboard v1.2 &nbsp;|&nbsp; Data powered by Supabase
 </footer>
 
-<!-- JAVASCRIPT -->
 <script>
-// ── Global State ────────────────────────────────────────
-let supabaseClient = null;
-let hubRegistry = [];
-let hubSnapshots = {};
-let hubMeta = {};
-let currentScenario = 'most_likely';
-let debugLog = [];
-let hasScenarioColumn = {};
+var supabaseClient = null;
+var hubRegistry = [];
+var hubSnapshots = {};
+var hubMeta = {};
+var currentScenario = 'most_likely';
+var debugLog = [];
+var scenarioChecked = {};
 
-// ── Debug Logging ───────────────────────────────────────
-function dbg(msg) {
-  const ts = new Date().toLocaleTimeString();
-  const line = '[' + ts + '] ' + msg;
+/* ── Column candidates for snapshot data ── */
+var NPV_COLS = ['npv','net_present_value','NPV'];
+var IRR_COLS = ['irr','internal_rate_of_return','IRR'];
+var DEV_COLS = ['total_dev_cost','dev_cost','total_development_cost','eng_total','total_nre','nre_cost'];
+var REV_COLS = ['total_revenue','revenue','annual_revenue','cumulative_revenue','total_rev'];
+
+/* ── Debug ── */
+function dbg(msg){
+  var ts = new Date().toLocaleTimeString();
+  var line = '['+ts+'] '+msg;
   console.log(line);
   debugLog.push(line);
-  const el = document.getElementById('debugBanner');
-  if (el) el.textContent = debugLog.join('\n');
+  var el = document.getElementById('debugBanner');
+  if(el) el.textContent = debugLog.join('\n');
+}
+function toggleDebug(){document.getElementById('debugBanner').classList.toggle('visible')}
+
+/* ── Column helpers ── */
+function resolveCol(row, candidates){
+  if(!row) return null;
+  for(var i=0;i<candidates.length;i++){
+    if(row[candidates[i]]!==undefined && row[candidates[i]]!==null && row[candidates[i]]!=='') return candidates[i];
+  }
+  return null;
+}
+function getVal(row, candidates, def){
+  if(!row) return def;
+  for(var i=0;i<candidates.length;i++){
+    if(row[candidates[i]]!==undefined && row[candidates[i]]!==null){
+      var v=parseFloat(row[candidates[i]]);
+      return isNaN(v)?def:v;
+    }
+  }
+  return def;
 }
 
-function toggleDebug() {
-  const el = document.getElementById('debugBanner');
-  el.classList.toggle('visible');
-}
+/* ── Init ── */
+document.addEventListener('DOMContentLoaded',function(){initSupabase()});
 
-// ── Initialize ──────────────────────────────────────────
-document.addEventListener('DOMContentLoaded', function() {
-  initSupabase();
-});
-
-function initSupabase() {
-  var raw = localStorage.getItem('roiStudioConfig');
-  var config = null;
-  try { config = JSON.parse(raw); } catch(e) {}
-  if (!config || !config.supabaseUrl || !config.supabaseAnonKey) {
+function initSupabase(){
+  var raw=localStorage.getItem('roiStudioConfig');
+  var config=null;
+  try{config=JSON.parse(raw)}catch(e){}
+  if(!config||!config.supabaseUrl||!config.supabaseAnonKey){
     document.getElementById('configBanner').classList.add('visible');
-    showEmptyState('Configure Supabase connection above to load portfolio data.');
-    dbg('No Supabase config found in localStorage key "roiStudioConfig"');
+    showEmpty('Configure Supabase connection above to load portfolio data.');
+    dbg('No config in localStorage "roiStudioConfig"');
     return;
   }
-  try {
-    supabaseClient = supabase.createClient(config.supabaseUrl, config.supabaseAnonKey);
+  try{
+    supabaseClient=supabase.createClient(config.supabaseUrl,config.supabaseAnonKey);
     document.getElementById('configBanner').classList.remove('visible');
-    dbg('Supabase client initialized: ' + config.supabaseUrl);
+    dbg('Supabase connected: '+config.supabaseUrl);
     loadPortfolio();
-  } catch (e) {
-    showError('Failed to initialize Supabase client: ' + e.message);
-    dbg('ERROR initializing Supabase: ' + e.message);
+  }catch(e){
+    showError('Init failed: '+e.message);
+    dbg('ERROR init: '+e.message);
   }
 }
-
-function saveConfig() {
-  var url = document.getElementById('cfgUrl').value.trim();
-  var key = document.getElementById('cfgKey').value.trim();
-  if (!url || !key) { alert('Please fill in both fields.'); return; }
-  localStorage.setItem('roiStudioConfig', JSON.stringify({ supabaseUrl: url, supabaseAnonKey: key }));
+function saveConfig(){
+  var u=document.getElementById('cfgUrl').value.trim();
+  var k=document.getElementById('cfgKey').value.trim();
+  if(!u||!k){alert('Fill both fields.');return}
+  localStorage.setItem('roiStudioConfig',JSON.stringify({supabaseUrl:u,supabaseAnonKey:k}));
   initSupabase();
 }
 
-// ── Smart Column Resolution ─────────────────────────────
-function resolveColumn(row, candidates, fallback) {
-  if (!row) return fallback;
-  for (var i = 0; i < candidates.length; i++) {
-    if (row[candidates[i]] !== undefined && row[candidates[i]] !== null) return candidates[i];
-  }
-  return fallback;
-}
-
-function getVal(row, candidates, defaultVal) {
-  if (!row) return defaultVal;
-  for (var i = 0; i < candidates.length; i++) {
-    if (row[candidates[i]] !== undefined && row[candidates[i]] !== null) {
-      var v = parseFloat(row[candidates[i]]);
-      return isNaN(v) ? defaultVal : v;
-    }
-  }
-  return defaultVal;
-}
-
-function deriveTableKey(name) {
-  return name
-    .toLowerCase()
-    .replace(/[^a-z0-9]+/g, '_')
-    .replace(/^_+|_+$/g, '')
-    .replace(/_+/g, '_');
-}
-
-// Column name candidates
-var NPV_COLS = ['npv', 'net_present_value', 'NPV', 'Net_Present_Value'];
-var IRR_COLS = ['irr', 'internal_rate_of_return', 'IRR', 'Internal_Rate_of_Return'];
-var DEV_COLS = ['total_dev_cost', 'dev_cost', 'total_development_cost', 'eng_total', 'total_nre', 'nre_cost', 'development_cost', 'total_engineering_cost'];
-var REV_COLS = ['total_revenue', 'revenue', 'annual_revenue', 'cumulative_revenue', 'total_rev'];
-
-// ── Data Loading ────────────────────────────────────────
-async function loadPortfolio() {
-  if (!supabaseClient) { initSupabase(); return; }
-  showLoading();
-  clearError();
-  debugLog = [];
+/* ── Load Portfolio ── */
+async function loadPortfolio(){
+  if(!supabaseClient){initSupabase();return}
+  showLoading();clearError();debugLog=[];
   dbg('=== Loading Portfolio ===');
 
-  try {
-    // 1. Fetch hub registry
-    var result = await supabaseClient
-      .from('roi_hub_registry')
-      .select('*')
-      .order('created_at', { ascending: true });
+  try{
+    var res=await supabaseClient.from('roi_hub_registry').select('*').order('created_at',{ascending:true});
+    if(res.error) throw res.error;
+    hubRegistry=res.data||[];
 
-    if (result.error) throw result.error;
-    hubRegistry = result.data || [];
-
-    dbg('Registry rows: ' + hubRegistry.length);
-    if (hubRegistry.length > 0) {
-      var firstRow = hubRegistry[0];
-      var cols = Object.keys(firstRow);
-      dbg('Columns found: ' + cols.join(', '));
-      dbg('First row data: ' + JSON.stringify(firstRow, null, 2));
+    dbg('Registry rows: '+hubRegistry.length);
+    if(hubRegistry.length>0){
+      var cols=Object.keys(hubRegistry[0]);
+      dbg('Columns: '+cols.join(', '));
+      dbg('First row: '+JSON.stringify(hubRegistry[0],null,2));
     }
 
-    // 2. Resolve key/name/url columns
-    hubMeta = {};
-    hubSnapshots = {};
-    hasScenarioColumn = {};
+    hubMeta={};hubSnapshots={};scenarioChecked={};
 
-    var keyColCandidates = ['hub_key', 'table_name', 'table_prefix', 'product_key', 'key', 'slug', 'product_code'];
-    var nameColCandidates = ['hub_name', 'product_name', 'name', 'title', 'display_name', 'hub_title'];
-    var urlColCandidates = ['hub_url', 'url', 'link', 'product_url', 'dashboard_url'];
+    /*
+     * KEY FIX: Column resolution priority
+     * db_table is FIRST because it contains the actual Supabase table name
+     * e.g. "atc_solution_roi" — already includes _roi suffix
+     */
+    var keyColCandidates = ['db_table','hub_key','table_name','table_prefix','hub_id','hub_short'];
+    var nameColCandidates = ['hub_name','product_name','name','title','display_name'];
+    var urlColCandidates = ['hub_url','url','link','product_url','dashboard_url'];
 
-    var keyCol = null;
-    var nameCol = null;
-    var urlCol = null;
+    var keyCol = hubRegistry.length>0 ? resolveCol(hubRegistry[0], keyColCandidates) : null;
+    var nameCol = hubRegistry.length>0 ? resolveCol(hubRegistry[0], nameColCandidates) : null;
+    var urlCol = hubRegistry.length>0 ? resolveCol(hubRegistry[0], urlColCandidates) : null;
 
-    if (hubRegistry.length > 0) {
-      keyCol = resolveColumn(hubRegistry[0], keyColCandidates, null);
-      nameCol = resolveColumn(hubRegistry[0], nameColCandidates, null);
-      urlCol = resolveColumn(hubRegistry[0], urlColCandidates, null);
-      dbg('Resolved columns -> key: "' + keyCol + '", name: "' + nameCol + '", url: "' + urlCol + '"');
-    }
+    dbg('Resolved -> keyCol: "'+keyCol+'", nameCol: "'+nameCol+'", urlCol: "'+urlCol+'"');
 
-    // 3. For each hub, resolve meta and fetch snapshots
-    var scenarios = ['low', 'most_likely', 'high'];
-    for (var h = 0; h < hubRegistry.length; h++) {
-      var hub = hubRegistry[h];
+    var scenarios=['low','most_likely','high'];
 
-      // Resolve the hub key (for table name)
-      var hubKey = null;
-      if (keyCol && hub[keyCol]) {
-        hubKey = hub[keyCol];
-      } else if (nameCol && hub[nameCol]) {
-        hubKey = deriveTableKey(hub[nameCol]);
+    for(var h=0;h<hubRegistry.length;h++){
+      var hub=hubRegistry[h];
+
+      /* Resolve table name */
+      var rawKey = keyCol ? hub[keyCol] : null;
+      if(!rawKey){
+        /* fallback: derive from hub_name */
+        var fn = hub.hub_name||hub.product_name||hub.name||hub.title||String(hub.id||'');
+        rawKey = fn.toLowerCase().replace(/[^a-z0-9]+/g,'_').replace(/^_+|_+$/g,'');
+      }
+      if(!rawKey){dbg('SKIP hub, no key: '+JSON.stringify(hub));continue}
+
+      /*
+       * KEY FIX: If keyCol is "db_table", the value is already the full table name
+       * (e.g. "atc_solution_roi"). Do NOT append "_roi" again.
+       * For other key columns (hub_id, hub_short, etc.), append "_roi" if missing.
+       */
+      var tableName;
+      if(keyCol==='db_table'){
+        tableName = rawKey;  // already "atc_solution_roi"
       } else {
-        var fallbackName = hub.hub_name || hub.product_name || hub.name || hub.title || hub.id;
-        hubKey = fallbackName ? deriveTableKey(String(fallbackName)) : null;
+        tableName = rawKey.endsWith('_roi') ? rawKey : rawKey+'_roi';
       }
 
-      if (!hubKey) {
-        dbg('SKIP: Could not resolve key for hub: ' + JSON.stringify(hub));
-        continue;
-      }
+      var hubName = nameCol ? (hub[nameCol]||rawKey) : rawKey;
+      var hubUrl = urlCol ? (hub[urlCol]||'#') : '#';
 
-      var hubName = (nameCol && hub[nameCol]) ? hub[nameCol] : hubKey;
-      var hubUrl = (urlCol && hub[urlCol]) ? hub[urlCol] : '#';
-      var tableName = hubKey.endsWith('_roi') ? hubKey : hubKey + '_roi';
+      hubMeta[rawKey]={name:hubName, url:hubUrl, key:rawKey, tableName:tableName, raw:hub};
+      hubSnapshots[rawKey]={};
 
-      hubMeta[hubKey] = { name: hubName, url: hubUrl, key: hubKey, tableName: tableName, raw: hub };
-      hubSnapshots[hubKey] = {};
+      dbg('Hub: "'+hubName+'" -> table: "'+tableName+'"');
 
-      dbg('Hub: "' + hubName + '" -> table: "' + tableName + '"');
+      /* Fetch snapshot data per scenario */
+      for(var s=0;s<scenarios.length;s++){
+        var sc=scenarios[s];
+        try{
+          var qr=await supabaseClient.from(tableName).select('*').eq('scenario',sc).order('created_at',{ascending:false}).limit(1);
 
-      // Try fetching data for each scenario
-      for (var s = 0; s < scenarios.length; s++) {
-        var sc = scenarios[s];
-        try {
-          // First attempt: with scenario filter
-          var snapResult = await supabaseClient
-            .from(tableName)
-            .select('*')
-            .eq('scenario', sc)
-            .order('created_at', { ascending: false })
-            .limit(1);
-
-          if (snapResult.error) {
-            dbg('  [' + sc + '] ERROR from "' + tableName + '": ' + snapResult.error.message);
-            hubSnapshots[hubKey][sc] = null;
-
-            // If table doesn't exist, skip remaining scenarios
-            if (snapResult.error.message.indexOf('could not find') >= 0 ||
-                snapResult.error.message.indexOf('Could not find') >= 0 ||
-                snapResult.error.message.indexOf('does not exist') >= 0) {
-              dbg('  Table "' + tableName + '" does not exist, skipping remaining scenarios');
-              hubSnapshots[hubKey]['low'] = null;
-              hubSnapshots[hubKey]['most_likely'] = null;
-              hubSnapshots[hubKey]['high'] = null;
+          if(qr.error){
+            dbg('  ['+sc+'] ERROR: '+qr.error.message);
+            hubSnapshots[rawKey][sc]=null;
+            if(qr.error.message.indexOf('not find')>=0||qr.error.message.indexOf('does not exist')>=0){
+              dbg('  Table "'+tableName+'" not found — skipping remaining scenarios');
+              hubSnapshots[rawKey].low=null;
+              hubSnapshots[rawKey].most_likely=null;
+              hubSnapshots[rawKey].high=null;
               break;
             }
             continue;
           }
 
-          var rows = snapResult.data;
-          if (rows && rows.length > 0) {
-            hubSnapshots[hubKey][sc] = rows[0];
-            hasScenarioColumn[tableName] = true;
-            dbg('  [' + sc + '] Found data. Columns: ' + Object.keys(rows[0]).join(', '));
+          if(qr.data&&qr.data.length>0){
+            hubSnapshots[rawKey][sc]=qr.data[0];
+            scenarioChecked[tableName]=true;
+            dbg('  ['+sc+'] OK — cols: '+Object.keys(qr.data[0]).join(', '));
           } else {
-            // No rows with scenario filter — maybe there's no scenario column
-            if (hasScenarioColumn[tableName] === undefined) {
-              dbg('  [' + sc + '] No rows with scenario filter. Trying without...');
-              var allResult = await supabaseClient
-                .from(tableName)
-                .select('*')
-                .order('created_at', { ascending: false })
-                .limit(1);
-
-              if (!allResult.error && allResult.data && allResult.data.length > 0) {
-                dbg('  Found data WITHOUT scenario filter. Columns: ' + Object.keys(allResult.data[0]).join(', '));
-                hasScenarioColumn[tableName] = false;
-                // Use same data for all scenarios
-                hubSnapshots[hubKey]['low'] = allResult.data[0];
-                hubSnapshots[hubKey]['most_likely'] = allResult.data[0];
-                hubSnapshots[hubKey]['high'] = allResult.data[0];
-                break; // No need to query more scenarios
+            /* No rows with scenario filter — maybe no scenario column */
+            if(scenarioChecked[tableName]===undefined){
+              dbg('  ['+sc+'] Empty. Trying without scenario filter...');
+              var fallback=await supabaseClient.from(tableName).select('*').order('created_at',{ascending:false}).limit(1);
+              if(!fallback.error&&fallback.data&&fallback.data.length>0){
+                dbg('  Fallback OK — cols: '+Object.keys(fallback.data[0]).join(', '));
+                scenarioChecked[tableName]=false;
+                hubSnapshots[rawKey].low=fallback.data[0];
+                hubSnapshots[rawKey].most_likely=fallback.data[0];
+                hubSnapshots[rawKey].high=fallback.data[0];
+                break;
               } else {
-                dbg('  No rows at all in "' + tableName + '"');
-                hubSnapshots[hubKey][sc] = null;
+                dbg('  No data at all in "'+tableName+'"');
+                hubSnapshots[rawKey][sc]=null;
               }
             } else {
-              hubSnapshots[hubKey][sc] = null;
+              hubSnapshots[rawKey][sc]=null;
             }
           }
-        } catch (e) {
-          dbg('  [' + sc + '] Exception: ' + (e.message || e));
-          hubSnapshots[hubKey][sc] = null;
+        }catch(e){
+          dbg('  ['+sc+'] Exception: '+(e.message||e));
+          hubSnapshots[rawKey][sc]=null;
         }
       }
     }
 
-    dbg('=== Portfolio Load Complete ===');
-    document.getElementById('lastUpdated').textContent = 'Last refreshed: ' + new Date().toLocaleTimeString();
-    renderPortfolio();
-  } catch (err) {
-    showError('Error loading portfolio: ' + (err.message || err));
-    showEmptyState('Failed to load data. Check your Supabase configuration and table names.');
-    dbg('FATAL: ' + (err.message || err));
+    dbg('=== Load Complete ===');
+    document.getElementById('lastUpdated').textContent='Updated: '+new Date().toLocaleTimeString();
+    renderAll();
+  }catch(err){
+    showError('Load error: '+(err.message||err));
+    showEmpty('Failed to load. Check Supabase config.');
+    dbg('FATAL: '+(err.message||err));
   }
 }
 
-// ── Rendering ───────────────────────────────────────────
-function renderPortfolio() {
-  renderKPIs();
-  renderHubCards();
-}
+/* ── Render ── */
+function renderAll(){renderKPIs();renderHubs()}
 
-function renderKPIs() {
-  var totalNPV = 0, totalDevCost = 0, totalRevenue = 0;
-  var irrValues = [], activeCount = 0;
-
-  var hubKeys = Object.keys(hubMeta);
-  for (var i = 0; i < hubKeys.length; i++) {
-    var key = hubKeys[i];
-    var snap = hubSnapshots[key] ? hubSnapshots[key][currentScenario] : null;
-    if (!snap) continue;
-    activeCount++;
-    totalNPV += getVal(snap, NPV_COLS, 0);
-    totalDevCost += getVal(snap, DEV_COLS, 0);
-    totalRevenue += getVal(snap, REV_COLS, 0);
-    var irr = getVal(snap, IRR_COLS, null);
-    if (irr !== null) irrValues.push(irr);
+function renderKPIs(){
+  var keys=Object.keys(hubMeta);
+  var tNPV=0,tDev=0,tRev=0,irrs=[],active=0;
+  for(var i=0;i<keys.length;i++){
+    var snap=hubSnapshots[keys[i]]?hubSnapshots[keys[i]][currentScenario]:null;
+    if(!snap) continue;
+    active++;
+    tNPV+=getVal(snap,NPV_COLS,0);
+    tDev+=getVal(snap,DEV_COLS,0);
+    tRev+=getVal(snap,REV_COLS,0);
+    var ir=getVal(snap,IRR_COLS,null);
+    if(ir!==null) irrs.push(ir);
   }
+  var avgIRR=irrs.length?irrs.reduce(function(a,b){return a+b},0)/irrs.length:0;
 
-  var avgIRR = irrValues.length > 0 ? irrValues.reduce(function(a, b) { return a + b; }, 0) / irrValues.length : 0;
-
-  var kpis = [
-    { label: 'Total Portfolio NPV', unit: '$(USD)', value: totalNPV, format: 'currency', colorize: true },
-    { label: 'Weighted Avg IRR', unit: '%', value: avgIRR, format: 'pct', colorize: true },
-    { label: 'Total Dev Cost', unit: '$(USD)', value: totalDevCost, format: 'currency', colorize: false },
-    { label: 'Total Revenue', unit: '$(USD)', value: totalRevenue, format: 'currency', colorize: false },
-    { label: 'Active Hubs', unit: '', value: activeCount, format: 'int', colorize: false }
+  var kpis=[
+    {l:'Total Portfolio NPV',u:'$(USD)',v:tNPV,f:'$',c:true},
+    {l:'Weighted Avg IRR',u:'%',v:avgIRR,f:'%',c:true},
+    {l:'Total Dev Cost',u:'$(USD)',v:tDev,f:'$',c:false},
+    {l:'Total Revenue',u:'$(USD)',v:tRev,f:'$',c:false},
+    {l:'Active Hubs',u:'',v:active,f:'n',c:false}
   ];
 
-  var container = document.getElementById('portfolioKPIs');
-  var html = '';
-  for (var j = 0; j < kpis.length; j++) {
-    var k = kpis[j];
-    var displayVal, colorClass = '';
-    if (k.format === 'currency') {
-      displayVal = '$' + formatNumber(k.value, 2);
-      if (k.colorize) colorClass = k.value > 0 ? 'positive' : k.value < 0 ? 'negative' : '';
-    } else if (k.format === 'pct') {
-      displayVal = formatNumber(k.value, 1) + '%';
-      if (k.colorize) colorClass = k.value > 0 ? 'positive' : k.value < 0 ? 'negative' : '';
-    } else {
-      displayVal = k.value;
-    }
-    html += '<div class="kpi-card">' +
-      '<div class="kpi-label">' + k.label + ' ' + (k.unit ? '<span class="kpi-unit">' + k.unit + '</span>' : '') + '</div>' +
-      '<div class="kpi-value ' + colorClass + '">' + displayVal + '</div>' +
-      '<div class="kpi-sub">Scenario: ' + formatScenarioName(currentScenario) + '</div>' +
-      '</div>';
+  var html='';
+  for(var j=0;j<kpis.length;j++){
+    var k=kpis[j];
+    var dv,cc='';
+    if(k.f==='$'){dv='$'+fmtNum(k.v,2);if(k.c)cc=k.v>0?'positive':k.v<0?'negative':''}
+    else if(k.f==='%'){dv=fmtNum(k.v,1)+'%';if(k.c)cc=k.v>0?'positive':k.v<0?'negative':''}
+    else{dv=k.v}
+    html+='<div class="kpi-card"><div class="kpi-label">'+k.l+' '+(k.u?'<span class="kpi-unit">'+k.u+'</span>':'')+'</div><div class="kpi-value '+cc+'">'+dv+'</div><div class="kpi-sub">Scenario: '+sceneName(currentScenario)+'</div></div>';
   }
-  container.innerHTML = html;
+  document.getElementById('portfolioKPIs').innerHTML=html;
 }
 
-function renderHubCards() {
-  var container = document.getElementById('hubContainer');
-  var hubKeys = Object.keys(hubMeta);
-  document.getElementById('hubCount').textContent = hubKeys.length + ' hub' + (hubKeys.length !== 1 ? 's' : '');
+function renderHubs(){
+  var keys=Object.keys(hubMeta);
+  document.getElementById('hubCount').textContent=keys.length+' hub'+(keys.length!==1?'s':'');
+  var container=document.getElementById('hubContainer');
 
-  if (hubKeys.length === 0) {
-    container.innerHTML = '<div class="empty-state"><div class="icon">&#x1F4ED;</div>' +
-      '<p>No ROI Hubs registered yet.</p>' +
-      '<p style="font-size:.75rem;margin-top:6px">Add hubs to <code>roi_hub_registry</code> in Supabase to get started.</p></div>';
+  if(keys.length===0){
+    container.innerHTML='<div class="empty-state"><div class="icon">&#x1F4ED;</div><p>No ROI Hubs found.</p></div>';
     return;
   }
 
-  var html = '<div class="hub-grid">';
-  for (var i = 0; i < hubKeys.length; i++) {
-    var key = hubKeys[i];
-    var meta = hubMeta[key];
-    var snap = hubSnapshots[key] ? hubSnapshots[key][currentScenario] : null;
-    var npv = snap ? getVal(snap, NPV_COLS, null) : null;
-    var irr = snap ? getVal(snap, IRR_COLS, null) : null;
-    var devCost = snap ? getVal(snap, DEV_COLS, null) : null;
+  var html='<div class="hub-grid">';
+  for(var i=0;i<keys.length;i++){
+    var meta=hubMeta[keys[i]];
+    var snap=hubSnapshots[keys[i]]?hubSnapshots[keys[i]][currentScenario]:null;
+    var npv=snap?getVal(snap,NPV_COLS,null):null;
+    var irr=snap?getVal(snap,IRR_COLS,null):null;
+    var dev=snap?getVal(snap,DEV_COLS,null):null;
+    var dot=npv===null?'orange':npv>0?'green':npv<0?'red':'orange';
+    var u=meta.url||'#';
+    var nm=esc(meta.name||keys[i]);
 
-    var dotClass = 'orange';
-    if (npv !== null) { dotClass = npv > 0 ? 'green' : npv < 0 ? 'red' : 'orange'; }
+    html+='<div class="hub-card" onclick="window.open(\''+u.replace(/'/g,"\\'")+"','_blank')\">";
+    html+='<div class="hub-card-header"><div class="hub-card-title"><span class="status-dot '+dot+'"></span>'+nm+'</div>';
+    html+='<a class="hub-card-link" href="'+esc(u)+'" target="_blank" onclick="event.stopPropagation()">Open Hub &rarr;</a></div>';
+    html+='<div class="hub-card-body">';
 
-    var hubUrl = meta.url || '#';
-    var safeName = escapeHtml(meta.name || key);
-
-    html += '<div class="hub-card" onclick="if(\'' + hubUrl.replace(/'/g, "\\'") + '\'!==\'#\') window.open(\'' + hubUrl.replace(/'/g, "\\'") + '\',\'_blank\')">' +
-      '<div class="hub-card-header">' +
-        '<div class="hub-card-title">' +
-          '<span class="status-dot ' + dotClass + '"></span>' +
-          safeName +
-        '</div>' +
-        '<a class="hub-card-link" href="' + escapeHtml(hubUrl) + '" target="_blank" onclick="event.stopPropagation()">Open Hub &rarr;</a>' +
-      '</div>' +
-      '<div class="hub-card-body">';
-
-    if (snap) {
-      html += '<div class="hub-kpi-row">' +
-        '<div class="hub-kpi">' +
-          '<div class="hub-kpi-label">NPV</div>' +
-          '<div class="hub-kpi-value" style="color:' + (npv > 0 ? 'var(--green)' : npv < 0 ? 'var(--red)' : 'var(--text-primary)') + '">$' + formatNumber(npv !== null ? npv : 0, 2) + '</div>' +
-          '<span class="hub-kpi-unit">$(USD)</span>' +
-        '</div>' +
-        '<div class="hub-kpi">' +
-          '<div class="hub-kpi-label">IRR</div>' +
-          '<div class="hub-kpi-value" style="color:' + (irr > 0 ? 'var(--green)' : irr < 0 ? 'var(--red)' : 'var(--text-primary)') + '">' + (irr !== null ? formatNumber(irr, 1) + '%' : '\u2014') + '</div>' +
-          '<span class="hub-kpi-unit">%</span>' +
-        '</div>' +
-        '<div class="hub-kpi">' +
-          '<div class="hub-kpi-label">Dev Cost</div>' +
-          '<div class="hub-kpi-value">$' + (devCost !== null ? formatNumber(devCost, 2) : '\u2014') + '</div>' +
-          '<span class="hub-kpi-unit">$(USD)</span>' +
-        '</div>' +
-      '</div>';
+    if(snap){
+      html+='<div class="hub-kpi-row">';
+      html+='<div class="hub-kpi"><div class="hub-kpi-label">NPV</div><div class="hub-kpi-value" style="color:'+(npv>0?'var(--green)':npv<0?'var(--red)':'var(--text-primary)')+'">$'+fmtNum(npv!==null?npv:0,2)+'</div><span class="hub-kpi-unit">$(USD)</span></div>';
+      html+='<div class="hub-kpi"><div class="hub-kpi-label">IRR</div><div class="hub-kpi-value" style="color:'+(irr>0?'var(--green)':irr<0?'var(--red)':'var(--text-primary)')+'">'+(irr!==null?fmtNum(irr,1)+'%':'\u2014')+'</div><span class="hub-kpi-unit">%</span></div>';
+      html+='<div class="hub-kpi"><div class="hub-kpi-label">Dev Cost</div><div class="hub-kpi-value">$'+(dev!==null?fmtNum(dev,2):'\u2014')+'</div><span class="hub-kpi-unit">$(USD)</span></div>';
+      html+='</div>';
     } else {
-      html += '<div style="text-align:center;padding:12px;color:var(--text-muted);font-size:.8rem">' +
-        'No data for <strong>' + formatScenarioName(currentScenario) + '</strong> scenario</div>';
+      html+='<div style="text-align:center;padding:12px;color:var(--text-muted);font-size:.8rem">No data for <strong>'+sceneName(currentScenario)+'</strong></div>';
     }
-
-    html += '</div></div>';
+    html+='</div></div>';
   }
-  html += '</div>';
-  container.innerHTML = html;
+  html+='</div>';
+  container.innerHTML=html;
 }
 
-// ── Scenario Switching ──────────────────────────────────
-function switchScenario(scenario) {
-  currentScenario = scenario;
-  document.querySelectorAll('.scenario-tab').forEach(function(tab) {
-    tab.classList.toggle('active', tab.dataset.scenario === scenario);
-  });
-  dbg('Switched scenario to: ' + formatScenarioName(scenario));
-  renderPortfolio();
+/* ── Scenario Switch ── */
+function switchScenario(sc){
+  currentScenario=sc;
+  document.querySelectorAll('.scenario-tab').forEach(function(t){t.classList.toggle('active',t.dataset.scenario===sc)});
+  dbg('Scenario -> '+sceneName(sc));
+  renderAll();
 }
 
-// ── Portfolio AI ────────────────────────────────────────
-function toggleAI() {
-  var panel = document.getElementById('aiPanel');
-  var main = document.getElementById('mainContent');
-  panel.classList.toggle('open');
-  main.classList.toggle('ai-open');
+/* ── Portfolio AI ── */
+function toggleAI(){
+  document.getElementById('aiPanel').classList.toggle('open');
+  document.getElementById('mainContent').classList.toggle('ai-open');
 }
-
-function sendAIMessage() {
-  var input = document.getElementById('aiInput');
-  var text = input.value.trim();
-  if (!text) return;
-  input.value = '';
-
-  var msgArea = document.getElementById('aiMessages');
-  msgArea.innerHTML += '<div class="ai-msg user">' + escapeHtml(text) + '</div>';
-
-  var typingId = 'typing-' + Date.now();
-  msgArea.innerHTML += '<div class="ai-msg system" id="' + typingId + '"><div class="typing"><span></span><span></span><span></span></div></div>';
-  msgArea.scrollTop = msgArea.scrollHeight;
-
-  setTimeout(function() {
-    var el = document.getElementById(typingId);
-    if (!el) return;
-    el.innerHTML = generateAIResponse(text);
-    msgArea.scrollTop = msgArea.scrollHeight;
-  }, 1500);
+function sendAIMessage(){
+  var inp=document.getElementById('aiInput');
+  var txt=inp.value.trim();if(!txt)return;inp.value='';
+  var ma=document.getElementById('aiMessages');
+  ma.innerHTML+='<div class="ai-msg user">'+esc(txt)+'</div>';
+  var tid='t'+Date.now();
+  ma.innerHTML+='<div class="ai-msg system" id="'+tid+'"><div class="typing"><span></span><span></span><span></span></div></div>';
+  ma.scrollTop=ma.scrollHeight;
+  setTimeout(function(){var el=document.getElementById(tid);if(el)el.innerHTML=aiReply(txt);ma.scrollTop=ma.scrollHeight},1200);
 }
+function aiReply(q){
+  var ql=q.toLowerCase(),keys=Object.keys(hubMeta);
+  var tN=0,tD=0,tR=0,irs=[],ct=0;
+  for(var i=0;i<keys.length;i++){
+    var sn=hubSnapshots[keys[i]]?hubSnapshots[keys[i]][currentScenario]:null;
+    if(!sn)continue;ct++;
+    tN+=getVal(sn,NPV_COLS,0);tD+=getVal(sn,DEV_COLS,0);tR+=getVal(sn,REV_COLS,0);
+    irs.push(getVal(sn,IRR_COLS,0));
+  }
+  var ai=irs.length?irs.reduce(function(a,b){return a+b},0)/irs.length:0;
 
-function generateAIResponse(query) {
-  var q = query.toLowerCase();
-  var hubKeys = Object.keys(hubMeta);
-  var totalNPV = 0, totalDev = 0, totalRev = 0, irrArr = [], count = 0;
-  for (var i = 0; i < hubKeys.length; i++) {
-    var snap = hubSnapshots[hubKeys[i]] ? hubSnapshots[hubKeys[i]][currentScenario] : null;
-    if (!snap) continue;
-    count++;
-    totalNPV += getVal(snap, NPV_COLS, 0);
-    totalDev += getVal(snap, DEV_COLS, 0);
-    totalRev += getVal(snap, REV_COLS, 0);
-    irrArr.push(getVal(snap, IRR_COLS, 0));
+  if(ql.indexOf('summary')>=0||ql.indexOf('overview')>=0||ql.indexOf('portfolio')>=0){
+    return '&#x1F4CA; <strong>'+sceneName(currentScenario)+' Summary</strong><br><br>&bull; Hubs: <strong>'+ct+'</strong><br>&bull; NPV: <strong>$'+fmtNum(tN,2)+'</strong><br>&bull; IRR: <strong>'+fmtNum(ai,1)+'%</strong><br>&bull; Dev Cost: <strong>$'+fmtNum(tD,2)+'</strong><br>&bull; Revenue: <strong>$'+fmtNum(tR,2)+'</strong>';
   }
-  var avgIRR = irrArr.length ? (irrArr.reduce(function(a,b){return a+b;},0)/irrArr.length) : 0;
-
-  if (q.indexOf('summary') >= 0 || q.indexOf('overview') >= 0 || q.indexOf('portfolio') >= 0) {
-    return '&#x1F4CA; <strong>Portfolio Summary (' + formatScenarioName(currentScenario) + ')</strong><br><br>' +
-      '&bull; <strong>' + count + '</strong> active hubs<br>' +
-      '&bull; Total NPV: <strong>$' + formatNumber(totalNPV,2) + '</strong><br>' +
-      '&bull; Avg IRR: <strong>' + formatNumber(avgIRR,1) + '%</strong><br>' +
-      '&bull; Total Dev Cost: <strong>$' + formatNumber(totalDev,2) + '</strong><br>' +
-      '&bull; Total Revenue: <strong>$' + formatNumber(totalRev,2) + '</strong><br><br>' +
-      '<em>Try switching scenarios to compare Low vs High projections.</em>';
+  if(ql.indexOf('best')>=0||ql.indexOf('top')>=0){
+    var b=null,bn=-Infinity;
+    for(var j=0;j<keys.length;j++){var s=hubSnapshots[keys[j]]?hubSnapshots[keys[j]][currentScenario]:null;if(!s)continue;var n=getVal(s,NPV_COLS,-Infinity);if(n>bn){bn=n;b=hubMeta[keys[j]]}}
+    if(b) return '&#x1F3C6; Top hub: <strong>'+esc(b.name)+'</strong> — NPV $'+fmtNum(bn,2);
   }
-  if (q.indexOf('best') >= 0 || q.indexOf('top') >= 0 || q.indexOf('winner') >= 0) {
-    var best = null, bestNPV = -Infinity;
-    for (var j = 0; j < hubKeys.length; j++) {
-      var s = hubSnapshots[hubKeys[j]] ? hubSnapshots[hubKeys[j]][currentScenario] : null;
-      if (!s) continue;
-      var n = getVal(s, NPV_COLS, -Infinity);
-      if (n > bestNPV) { bestNPV = n; best = hubMeta[hubKeys[j]]; }
-    }
-    if (best) return '&#x1F3C6; Top hub under <strong>' + formatScenarioName(currentScenario) + '</strong> is <strong>' + escapeHtml(best.name) + '</strong> with NPV <strong>$' + formatNumber(bestNPV,2) + '</strong>.';
+  if(ql.indexOf('risk')>=0||ql.indexOf('negative')>=0){
+    var neg=[];
+    for(var k=0;k<keys.length;k++){var ss=hubSnapshots[keys[k]]?hubSnapshots[keys[k]][currentScenario]:null;if(ss&&getVal(ss,NPV_COLS,0)<0)neg.push(hubMeta[keys[k]].name)}
+    if(neg.length)return '&#x26A0; '+neg.length+' hub(s) negative NPV: '+neg.map(function(n){return '<strong>'+esc(n)+'</strong>'}).join(', ');
+    return '&#x2705; All hubs positive under '+sceneName(currentScenario);
   }
-  if (q.indexOf('risk') >= 0 || q.indexOf('worst') >= 0 || q.indexOf('negative') >= 0) {
-    var negHubs = [];
-    for (var k = 0; k < hubKeys.length; k++) {
-      var ss = hubSnapshots[hubKeys[k]] ? hubSnapshots[hubKeys[k]][currentScenario] : null;
-      if (!ss) continue;
-      if (getVal(ss, NPV_COLS, 0) < 0) negHubs.push(hubMeta[hubKeys[k]].name);
-    }
-    if (negHubs.length) return '&#x26A0;&#xFE0F; <strong>' + negHubs.length + '</strong> hub(s) with negative NPV: ' + negHubs.map(function(nm){return '<strong>'+escapeHtml(nm)+'</strong>';}).join(', ');
-    return '&#x2705; All hubs have non-negative NPV under <strong>' + formatScenarioName(currentScenario) + '</strong>.';
-  }
-  if (q.indexOf('debug') >= 0 || q.indexOf('schema') >= 0 || q.indexOf('column') >= 0) {
-    var info = '&#x1F41E; <strong>Debug Info</strong><br><br>Registry hubs: ' + hubKeys.length + '<br>';
-    for (var d = 0; d < hubKeys.length; d++) {
-      var ds = hubSnapshots[hubKeys[d]] ? hubSnapshots[hubKeys[d]][currentScenario] : null;
-      info += '<br><strong>' + escapeHtml(hubMeta[hubKeys[d]].name) + '</strong> (table: ' + hubMeta[hubKeys[d]].tableName + ')<br>';
-      if (ds) { info += 'Columns: ' + Object.keys(ds).join(', ') + '<br>'; } else { info += 'No data<br>'; }
+  if(ql.indexOf('debug')>=0||ql.indexOf('schema')>=0){
+    var info='&#x1F41E; <strong>Schema Debug</strong><br>';
+    for(var d=0;d<keys.length;d++){
+      var ds=hubSnapshots[keys[d]]?hubSnapshots[keys[d]][currentScenario]:null;
+      info+='<br><strong>'+esc(hubMeta[keys[d]].name)+'</strong> ('+hubMeta[keys[d]].tableName+')<br>';
+      info+=ds?'Cols: '+Object.keys(ds).join(', ')+'<br>':'No data<br>';
     }
     return info;
   }
-
-  return '&#x1F916; <strong>Portfolio AI</strong><br><br>' +
-    'Scenario: <strong>' + formatScenarioName(currentScenario) + '</strong> | <strong>' + count + '</strong> hubs<br>' +
-    'NPV: <strong>$' + formatNumber(totalNPV,2) + '</strong> | IRR: <strong>' + formatNumber(avgIRR,1) + '%</strong><br><br>' +
-    '<em>Try: "portfolio summary", "top performer", "risk analysis", "debug schema"</em>';
+  return '&#x1F916; '+sceneName(currentScenario)+': <strong>'+ct+'</strong> hubs | NPV $'+fmtNum(tN,2)+' | IRR '+fmtNum(ai,1)+'%<br><br><em>Try: "summary", "top performer", "risk", "debug schema"</em>';
 }
 
-// ── Utility Functions ───────────────────────────────────
-function formatNumber(num, decimals) {
-  if (num === null || num === undefined || isNaN(num)) return '\u2014';
-  return Number(num).toLocaleString('en-US', { minimumFractionDigits: decimals, maximumFractionDigits: decimals });
+/* ── Utilities ── */
+function fmtNum(n,d){if(n===null||n===undefined||isNaN(n))return'\u2014';return Number(n).toLocaleString('en-US',{minimumFractionDigits:d,maximumFractionDigits:d})}
+function sceneName(s){return{low:'Low',most_likely:'Most Likely',high:'High'}[s]||s}
+function esc(s){if(!s)return'';var d=document.createElement('div');d.appendChild(document.createTextNode(s));return d.innerHTML}
+function showLoading(){
+  document.getElementById('hubContainer').innerHTML='<div class="loading-overlay"><div class="spinner"></div><div class="loading-text">Loading from Supabase...</div></div>';
+  var p='';for(var i=0;i<5;i++)p+='<div class="kpi-card" style="opacity:.5"><div class="kpi-label">Loading...</div><div class="kpi-value" style="color:var(--text-muted)">&mdash;</div></div>';
+  document.getElementById('portfolioKPIs').innerHTML=p;
 }
-
-function formatScenarioName(sc) {
-  var map = { low: 'Low', most_likely: 'Most Likely', high: 'High' };
-  return map[sc] || sc;
-}
-
-function escapeHtml(str) {
-  if (!str) return '';
-  var div = document.createElement('div');
-  div.appendChild(document.createTextNode(str));
-  return div.innerHTML;
-}
-
-function showLoading() {
-  document.getElementById('hubContainer').innerHTML =
-    '<div class="loading-overlay"><div class="spinner"></div><div class="loading-text">Loading portfolio data from Supabase...</div></div>';
-  var placeholder = '';
-  for (var i = 0; i < 5; i++) {
-    placeholder += '<div class="kpi-card" style="opacity:.5"><div class="kpi-label">Loading...</div><div class="kpi-value" style="color:var(--text-muted)">&mdash;</div></div>';
-  }
-  document.getElementById('portfolioKPIs').innerHTML = placeholder;
-}
-
-function showEmptyState(msg) {
-  document.getElementById('hubContainer').innerHTML = '<div class="empty-state"><div class="icon">&#x1F50C;</div><p>' + msg + '</p></div>';
-}
-
-function showError(msg) {
-  document.getElementById('errorContainer').innerHTML = '<div class="error-msg">&#x26D4; ' + escapeHtml(msg) + '</div>';
-}
-
-function clearError() {
-  document.getElementById('errorContainer').innerHTML = '';
-}
+function showEmpty(m){document.getElementById('hubContainer').innerHTML='<div class="empty-state"><div class="icon">&#x1F50C;</div><p>'+m+'</p></div>'}
+function showError(m){document.getElementById('errorContainer').innerHTML='<div class="error-msg">&#x26D4; '+esc(m)+'</div>'}
+function clearError(){document.getElementById('errorContainer').innerHTML=''}
 </script>
 </body>
 </html>
