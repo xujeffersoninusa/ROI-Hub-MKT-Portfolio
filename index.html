@@ -196,7 +196,7 @@ a{color:var(--accent);text-decoration:none}a:hover{text-decoration:underline}
 </div>
 
 <footer class="footer">
-  Teradyne ROI Hub OS &copy; 2026 &nbsp;|&nbsp; Portfolio Dashboard v1.2 &nbsp;|&nbsp; Data powered by Supabase
+  Teradyne ROI Hub OS &copy; 2026 &nbsp;|&nbsp; Portfolio Dashboard v1.3 &nbsp;|&nbsp; Data powered by Supabase
 </footer>
 
 <script>
@@ -206,9 +206,8 @@ var hubSnapshots = {};
 var hubMeta = {};
 var currentScenario = 'most_likely';
 var debugLog = [];
-var scenarioChecked = {};
 
-/* ── Column candidates for snapshot data ── */
+/* Column candidates for snapshot data */
 var NPV_COLS = ['npv','net_present_value','NPV'];
 var IRR_COLS = ['irr','internal_rate_of_return','IRR'];
 var DEV_COLS = ['total_dev_cost','dev_cost','total_development_cost','eng_total','total_nre','nre_cost'];
@@ -216,27 +215,27 @@ var REV_COLS = ['total_revenue','revenue','annual_revenue','cumulative_revenue',
 
 /* ── Debug ── */
 function dbg(msg){
-  var ts = new Date().toLocaleTimeString();
-  var line = '['+ts+'] '+msg;
+  var ts=new Date().toLocaleTimeString();
+  var line='['+ts+'] '+msg;
   console.log(line);
   debugLog.push(line);
-  var el = document.getElementById('debugBanner');
-  if(el) el.textContent = debugLog.join('\n');
+  var el=document.getElementById('debugBanner');
+  if(el) el.textContent=debugLog.join('\n');
 }
 function toggleDebug(){document.getElementById('debugBanner').classList.toggle('visible')}
 
 /* ── Column helpers ── */
-function resolveCol(row, candidates){
-  if(!row) return null;
+function resolveCol(row,candidates){
+  if(!row)return null;
   for(var i=0;i<candidates.length;i++){
-    if(row[candidates[i]]!==undefined && row[candidates[i]]!==null && row[candidates[i]]!=='') return candidates[i];
+    if(row[candidates[i]]!==undefined&&row[candidates[i]]!==null&&row[candidates[i]]!=='')return candidates[i];
   }
   return null;
 }
-function getVal(row, candidates, def){
-  if(!row) return def;
+function getVal(row,candidates,def){
+  if(!row)return def;
   for(var i=0;i<candidates.length;i++){
-    if(row[candidates[i]]!==undefined && row[candidates[i]]!==null){
+    if(row[candidates[i]]!==undefined&&row[candidates[i]]!==null){
       var v=parseFloat(row[candidates[i]]);
       return isNaN(v)?def:v;
     }
@@ -288,25 +287,20 @@ async function loadPortfolio(){
 
     dbg('Registry rows: '+hubRegistry.length);
     if(hubRegistry.length>0){
-      var cols=Object.keys(hubRegistry[0]);
-      dbg('Columns: '+cols.join(', '));
+      dbg('Columns: '+Object.keys(hubRegistry[0]).join(', '));
       dbg('First row: '+JSON.stringify(hubRegistry[0],null,2));
     }
 
-    hubMeta={};hubSnapshots={};scenarioChecked={};
+    hubMeta={};hubSnapshots={};
 
-    /*
-     * KEY FIX: Column resolution priority
-     * db_table is FIRST because it contains the actual Supabase table name
-     * e.g. "atc_solution_roi" — already includes _roi suffix
-     */
-    var keyColCandidates = ['db_table','hub_key','table_name','table_prefix','hub_id','hub_short'];
-    var nameColCandidates = ['hub_name','product_name','name','title','display_name'];
-    var urlColCandidates = ['hub_url','url','link','product_url','dashboard_url'];
+    /* Column resolution: db_table FIRST (contains actual Supabase table name) */
+    var keyColCandidates=['db_table','hub_key','table_name','table_prefix','hub_id','hub_short'];
+    var nameColCandidates=['hub_name','product_name','name','title','display_name'];
+    var urlColCandidates=['hub_url','url','link','product_url','dashboard_url'];
 
-    var keyCol = hubRegistry.length>0 ? resolveCol(hubRegistry[0], keyColCandidates) : null;
-    var nameCol = hubRegistry.length>0 ? resolveCol(hubRegistry[0], nameColCandidates) : null;
-    var urlCol = hubRegistry.length>0 ? resolveCol(hubRegistry[0], urlColCandidates) : null;
+    var keyCol=hubRegistry.length>0?resolveCol(hubRegistry[0],keyColCandidates):null;
+    var nameCol=hubRegistry.length>0?resolveCol(hubRegistry[0],nameColCandidates):null;
+    var urlCol=hubRegistry.length>0?resolveCol(hubRegistry[0],urlColCandidates):null;
 
     dbg('Resolved -> keyCol: "'+keyCol+'", nameCol: "'+nameCol+'", urlCol: "'+urlCol+'"');
 
@@ -316,81 +310,90 @@ async function loadPortfolio(){
       var hub=hubRegistry[h];
 
       /* Resolve table name */
-      var rawKey = keyCol ? hub[keyCol] : null;
+      var rawKey=keyCol?hub[keyCol]:null;
       if(!rawKey){
-        /* fallback: derive from hub_name */
-        var fn = hub.hub_name||hub.product_name||hub.name||hub.title||String(hub.id||'');
-        rawKey = fn.toLowerCase().replace(/[^a-z0-9]+/g,'_').replace(/^_+|_+$/g,'');
+        var fn=hub.hub_name||hub.product_name||hub.name||hub.title||String(hub.id||'');
+        rawKey=fn.toLowerCase().replace(/[^a-z0-9]+/g,'_').replace(/^_+|_+$/g,'');
       }
       if(!rawKey){dbg('SKIP hub, no key: '+JSON.stringify(hub));continue}
 
-      /*
-       * KEY FIX: If keyCol is "db_table", the value is already the full table name
-       * (e.g. "atc_solution_roi"). Do NOT append "_roi" again.
-       * For other key columns (hub_id, hub_short, etc.), append "_roi" if missing.
-       */
+      /* db_table = exact table name; others need _roi suffix */
       var tableName;
       if(keyCol==='db_table'){
-        tableName = rawKey;  // already "atc_solution_roi"
-      } else {
-        tableName = rawKey.endsWith('_roi') ? rawKey : rawKey+'_roi';
+        tableName=rawKey;
+      }else{
+        tableName=rawKey.endsWith('_roi')?rawKey:rawKey+'_roi';
       }
 
-      var hubName = nameCol ? (hub[nameCol]||rawKey) : rawKey;
-      var hubUrl = urlCol ? (hub[urlCol]||'#') : '#';
+      var hubName=nameCol?(hub[nameCol]||rawKey):rawKey;
+      var hubUrl=urlCol?(hub[urlCol]||'#'):'#';
 
-      hubMeta[rawKey]={name:hubName, url:hubUrl, key:rawKey, tableName:tableName, raw:hub};
+      hubMeta[rawKey]={name:hubName,url:hubUrl,key:rawKey,tableName:tableName,raw:hub};
       hubSnapshots[rawKey]={};
 
       dbg('Hub: "'+hubName+'" -> table: "'+tableName+'"');
 
-      /* Fetch snapshot data per scenario */
-      for(var s=0;s<scenarios.length;s++){
-        var sc=scenarios[s];
-        try{
-          var qr=await supabaseClient.from(tableName).select('*').eq('scenario',sc).order('created_at',{ascending:false}).limit(1);
+      /*
+       * PROBE-FIRST STRATEGY:
+       * 1) Fetch latest row WITHOUT scenario filter
+       * 2) Check if returned row has a "scenario" column
+       * 3) If yes: re-fetch per scenario
+       * 4) If no:  use same latest row for all scenarios
+       */
+      try{
+        /* Step 1: Probe — fetch latest row, no filter */
+        var probe=await supabaseClient.from(tableName).select('*').order('created_at',{ascending:false}).limit(1);
 
-          if(qr.error){
-            dbg('  ['+sc+'] ERROR: '+qr.error.message);
-            hubSnapshots[rawKey][sc]=null;
-            if(qr.error.message.indexOf('not find')>=0||qr.error.message.indexOf('does not exist')>=0){
-              dbg('  Table "'+tableName+'" not found — skipping remaining scenarios');
-              hubSnapshots[rawKey].low=null;
-              hubSnapshots[rawKey].most_likely=null;
-              hubSnapshots[rawKey].high=null;
-              break;
-            }
-            continue;
-          }
-
-          if(qr.data&&qr.data.length>0){
-            hubSnapshots[rawKey][sc]=qr.data[0];
-            scenarioChecked[tableName]=true;
-            dbg('  ['+sc+'] OK — cols: '+Object.keys(qr.data[0]).join(', '));
-          } else {
-            /* No rows with scenario filter — maybe no scenario column */
-            if(scenarioChecked[tableName]===undefined){
-              dbg('  ['+sc+'] Empty. Trying without scenario filter...');
-              var fallback=await supabaseClient.from(tableName).select('*').order('created_at',{ascending:false}).limit(1);
-              if(!fallback.error&&fallback.data&&fallback.data.length>0){
-                dbg('  Fallback OK — cols: '+Object.keys(fallback.data[0]).join(', '));
-                scenarioChecked[tableName]=false;
-                hubSnapshots[rawKey].low=fallback.data[0];
-                hubSnapshots[rawKey].most_likely=fallback.data[0];
-                hubSnapshots[rawKey].high=fallback.data[0];
-                break;
-              } else {
-                dbg('  No data at all in "'+tableName+'"');
-                hubSnapshots[rawKey][sc]=null;
-              }
-            } else {
-              hubSnapshots[rawKey][sc]=null;
-            }
-          }
-        }catch(e){
-          dbg('  ['+sc+'] Exception: '+(e.message||e));
-          hubSnapshots[rawKey][sc]=null;
+        if(probe.error){
+          dbg('  Table "'+tableName+'" error: '+probe.error.message);
+          hubSnapshots[rawKey].low=null;
+          hubSnapshots[rawKey].most_likely=null;
+          hubSnapshots[rawKey].high=null;
+          continue;
         }
+
+        if(!probe.data||probe.data.length===0){
+          dbg('  Table "'+tableName+'" exists but is empty');
+          hubSnapshots[rawKey].low=null;
+          hubSnapshots[rawKey].most_likely=null;
+          hubSnapshots[rawKey].high=null;
+          continue;
+        }
+
+        var sampleRow=probe.data[0];
+        var sampleCols=Object.keys(sampleRow);
+        dbg('  Table columns: '+sampleCols.join(', '));
+
+        /* Step 2: Check if "scenario" column exists */
+        var hasScenario=sampleCols.indexOf('scenario')>=0;
+
+        if(hasScenario){
+          dbg('  Has "scenario" column — fetching per scenario');
+          /* Step 3: Fetch per scenario */
+          for(var s=0;s<scenarios.length;s++){
+            var sc=scenarios[s];
+            var qr=await supabaseClient.from(tableName).select('*').eq('scenario',sc).order('created_at',{ascending:false}).limit(1);
+            if(!qr.error&&qr.data&&qr.data.length>0){
+              hubSnapshots[rawKey][sc]=qr.data[0];
+              dbg('  ['+sc+'] OK');
+            }else{
+              hubSnapshots[rawKey][sc]=null;
+              dbg('  ['+sc+'] No data'+(qr.error?' — '+qr.error.message:''));
+            }
+          }
+        }else{
+          /* Step 4: No scenario column — use latest row for all */
+          dbg('  No "scenario" column — using latest row for all scenarios');
+          hubSnapshots[rawKey].low=sampleRow;
+          hubSnapshots[rawKey].most_likely=sampleRow;
+          hubSnapshots[rawKey].high=sampleRow;
+        }
+
+      }catch(e){
+        dbg('  Exception for "'+tableName+'": '+(e.message||e));
+        hubSnapshots[rawKey].low=null;
+        hubSnapshots[rawKey].most_likely=null;
+        hubSnapshots[rawKey].high=null;
       }
     }
 
@@ -463,7 +466,7 @@ function renderHubs(){
     var u=meta.url||'#';
     var nm=esc(meta.name||keys[i]);
 
-    html+='<div class="hub-card" onclick="window.open(\''+u.replace(/'/g,"\\'")+"','_blank')\">";
+    html+='<div class="hub-card" onclick="window.open(\''+u.replace(/'/g,"\\\'")+'\',\'_blank\')">';
     html+='<div class="hub-card-header"><div class="hub-card-title"><span class="status-dot '+dot+'"></span>'+nm+'</div>';
     html+='<a class="hub-card-link" href="'+esc(u)+'" target="_blank" onclick="event.stopPropagation()">Open Hub &rarr;</a></div>';
     html+='<div class="hub-card-body">';
@@ -474,7 +477,7 @@ function renderHubs(){
       html+='<div class="hub-kpi"><div class="hub-kpi-label">IRR</div><div class="hub-kpi-value" style="color:'+(irr>0?'var(--green)':irr<0?'var(--red)':'var(--text-primary)')+'">'+(irr!==null?fmtNum(irr,1)+'%':'\u2014')+'</div><span class="hub-kpi-unit">%</span></div>';
       html+='<div class="hub-kpi"><div class="hub-kpi-label">Dev Cost</div><div class="hub-kpi-value">$'+(dev!==null?fmtNum(dev,2):'\u2014')+'</div><span class="hub-kpi-unit">$(USD)</span></div>';
       html+='</div>';
-    } else {
+    }else{
       html+='<div style="text-align:center;padding:12px;color:var(--text-muted);font-size:.8rem">No data for <strong>'+sceneName(currentScenario)+'</strong></div>';
     }
     html+='</div></div>';
