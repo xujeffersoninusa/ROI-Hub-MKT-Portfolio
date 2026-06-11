@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>ROI Portfolio Dashboard - Teradyne ROI Hub OS</title>
+<title>ROI Portfolio Dashboard v4 - Teradyne ROI Hub OS</title>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
 <style>
 
@@ -133,6 +133,20 @@ a{color:var(--accent);text-decoration:none}a:hover{text-decoration:underline}
   .scenario-tab{padding:8px 14px;font-size:.78rem}
 }
 
+
+.ai-chips{display:flex;flex-wrap:wrap;gap:6px;padding:10px 18px 8px;border-bottom:1px solid var(--border);max-height:140px;overflow-y:auto}
+.ai-chip{display:inline-flex;align-items:center;gap:4px;padding:5px 12px;border-radius:20px;font-size:.72rem;font-weight:600;background:rgba(255,102,0,.1);color:var(--accent);border:1px solid rgba(255,102,0,.25);cursor:pointer;transition:var(--transition);white-space:nowrap}
+.ai-chip:hover{background:var(--accent);color:#fff;transform:translateY(-1px)}
+.ai-msg table{width:100%;border-collapse:collapse;margin:8px 0;font-size:.75rem}
+.ai-msg th,.ai-msg td{padding:5px 8px;border:1px solid var(--border);text-align:left}
+.ai-msg th{background:rgba(255,102,0,.15);color:var(--accent);font-weight:700}
+.ai-msg code{background:rgba(0,0,0,.3);padding:1px 5px;border-radius:3px;font-size:.75rem}
+.ai-msg .kb-title{color:var(--accent);font-size:.9rem;font-weight:700;margin-bottom:6px;display:flex;align-items:center;gap:6px}
+.ai-msg .kb-formula{background:rgba(0,0,0,.35);padding:8px 12px;border-radius:6px;margin:8px 0;font-family:'Courier New',monospace;font-size:.78rem;color:var(--green);border-left:3px solid var(--green)}
+.ai-msg .kb-section{margin-top:8px}
+.ai-msg .kb-section strong{color:var(--text-primary);font-size:.78rem}
+.ai-msg .kb-tip{border-left:3px solid var(--accent);padding:6px 10px;margin-top:10px;font-size:.75rem;color:var(--text-secondary);background:rgba(255,102,0,.05);border-radius:0 6px 6px 0}
+
 </style>
 </head>
 <body>
@@ -193,8 +207,22 @@ a{color:var(--accent);text-decoration:none}a:hover{text-decoration:underline}
       <h3><span class="dot"></span> Portfolio AI</h3>
       <button class="ai-close" onclick="toggleAI()">&times;</button>
     </div>
+        <div class="ai-chips" id="aiChips">
+      <button class="ai-chip" onclick="chipClick('Portfolio summary')">&#x1F4CA; Portfolio Summary</button>
+      <button class="ai-chip" onclick="chipClick('Top performer')">&#x1F3C6; Top Performer</button>
+      <button class="ai-chip" onclick="chipClick('Risk analysis')">&#x26A0;&#xFE0F; Risk Analysis</button>
+      <button class="ai-chip" onclick="chipClick('Compare scenarios')">&#x1F504; Compare Scenarios</button>
+      <button class="ai-chip" onclick="chipClick('What is NPV?')">&#x1F4A1; What is NPV?</button>
+      <button class="ai-chip" onclick="chipClick('What is IRR?')">&#x1F4C8; What is IRR?</button>
+      <button class="ai-chip" onclick="chipClick('Explain WACC')">&#x1F4B0; Explain WACC</button>
+      <button class="ai-chip" onclick="chipClick('GO/NO-GO criteria')">&#x1F3AF; GO/NO-GO Criteria</button>
+      <button class="ai-chip" onclick="chipClick('BET vs BEAR')">&#x23F1;&#xFE0F; BET vs BEAR</button>
+      <button class="ai-chip" onclick="chipClick('Sensitivity analysis')">&#x1F4C9; Sensitivity Analysis</button>
+      <button class="ai-chip" onclick="chipClick('What is Gross Margin?')">&#x1F4B5; Gross Margin</button>
+      <button class="ai-chip" onclick="chipClick('Payback period')">&#x1F501; Payback Period</button>
+    </div>
     <div class="ai-messages" id="aiMessages">
-      <div class="ai-msg system">&#x1F44B; Hi! I'm <strong>Portfolio AI</strong>. Ask me about your ROI portfolio &mdash; summaries, top performers, risk analysis, or scenario comparisons!</div>
+      <div class="ai-msg system">&#x1F44B; Hi! I'm <strong>Portfolio AI</strong> with a built-in <strong>Financial Knowledge Base</strong>. Ask me anything about your portfolio, or tap a chip below to get started!</div>
     </div>
     <div class="ai-input-area">
       <textarea class="ai-input" id="aiInput" rows="1" placeholder="Ask about your portfolio..." onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();sendAI()}"></textarea>
@@ -204,7 +232,7 @@ a{color:var(--accent);text-decoration:none}a:hover{text-decoration:underline}
 </div>
 
 <footer class="footer">
-  Teradyne ROI Hub OS &copy; 2026 &nbsp;|&nbsp; Portfolio Dashboard v2.0 &nbsp;|&nbsp; Data powered by Supabase
+  Teradyne ROI Hub OS &copy; 2026 &nbsp;|&nbsp; Portfolio Dashboard v4.0 &nbsp;|&nbsp; &#x1F4DA; Financial Knowledge Base &nbsp;|&nbsp; Data powered by Supabase
 </footer>
 
 <script>
@@ -419,8 +447,195 @@ function sendAI(){
   setTimeout(function(){var el=document.getElementById(tid);if(el)el.innerHTML=aiReply(txt);ma.scrollTop=ma.scrollHeight},1200);
 }
 
+
+function chipClick(text){
+  document.getElementById('aiInput').value=text;
+  sendAI();
+}
+
+var KB={
+npv:{
+  emoji:'&#x1F4A1;',title:'Net Present Value (NPV)',
+  def:'NPV is the difference between the present value of all future cash inflows and the present value of all cash outflows over a project\'s lifetime. It answers: <em>"Does this investment create or destroy value?"</em>',
+  formula:'NPV = &sum; [CF<sub>t</sub> / (1 + r)<sup>t</sup>] &minus; Initial Investment<br><small>where CF<sub>t</sub> = cash flow at time t, r = discount rate (WACC)</small>',
+  interpret:'<strong>NPV &gt; 0</strong> &rarr; Project creates value (GO) &nbsp;|&nbsp; <strong>NPV &lt; 0</strong> &rarr; Project destroys value (NO-GO) &nbsp;|&nbsp; <strong>NPV = 0</strong> &rarr; Project earns exactly the cost of capital',
+  hub:'In ROI Hub, NPV is auto-calculated per scenario (Low / Most Likely / High) using your revenue projections, dev costs, and the configured discount rate. The Portfolio Dashboard aggregates NPV across all product hubs.'
+},
+irr:{
+  emoji:'&#x1F4C8;',title:'Internal Rate of Return (IRR)',
+  def:'IRR is the discount rate that makes the NPV of a project exactly zero. Think of it as the project\'s <em>effective annual return rate</em>. It tells you the yield you can expect from the investment.',
+  formula:'0 = &sum; [CF<sub>t</sub> / (1 + IRR)<sup>t</sup>] &minus; Initial Investment<br><small>Solved iteratively &mdash; there\'s no closed-form solution</small>',
+  interpret:'<strong>IRR &gt; WACC</strong> &rarr; Project beats cost of capital (GO) &nbsp;|&nbsp; <strong>IRR &lt; WACC</strong> &rarr; Project underperforms (NO-GO) &nbsp;|&nbsp; <strong>IRR = WACC</strong> &rarr; NPV is exactly $0',
+  hub:'ROI Hub computes IRR for each scenario. The KPI card shows IRR with color coding: green if above 12% (typical WACC hurdle), red if negative. Compare IRR across hubs in the Portfolio Dashboard to rank investment attractiveness.'
+},
+wacc:{
+  emoji:'&#x1F4B0;',title:'Weighted Average Cost of Capital (WACC)',
+  def:'WACC represents the blended rate of return a company must earn on its existing assets to satisfy its debt holders and equity investors. It\'s the <em>minimum acceptable return</em> (hurdle rate) for new investments.',
+  formula:'WACC = (E/V) &times; Re + (D/V) &times; Rd &times; (1 &minus; Tc)<br><small>E = equity, D = debt, V = E+D, Re = cost of equity, Rd = cost of debt, Tc = tax rate</small>',
+  interpret:'WACC is used as the <strong>discount rate</strong> in NPV calculations. A typical industrial company WACC is 8&ndash;14%. If a project\'s IRR exceeds WACC, it creates shareholder value.',
+  hub:'In ROI Hub, WACC is configured in the settings and used as the discount rate for NPV calculations across all three scenarios. Adjusting WACC directly impacts all NPV and GO/NO-GO outcomes.'
+},
+bet:{
+  emoji:'&#x23F1;&#xFE0F;',title:'Break-Even Time (BET)',
+  def:'BET measures how long it takes from the <em>start of development</em> until cumulative discounted cash flows turn positive. It captures the full investment lifecycle including the R&amp;D phase.',
+  formula:'BET = Time when cumulative discounted cash flow &ge; 0<br><small>Measured from project start (includes dev time)</small>',
+  interpret:'<strong>Shorter BET</strong> = faster value recovery = lower risk. BET includes dev time, so a 2-year dev + 2-year payback = BET of 4 years. Compare BET across products to assess portfolio risk.',
+  hub:'ROI Hub calculates BET from the cumulative NPV curve in the Dashboard. The BET &amp; BEAR chart visually shows when cumulative cash flow crosses zero.'
+},
+bear:{
+  emoji:'&#x1F43B;',title:'Break-Even After Release (BEAR)',
+  def:'BEAR measures how long after <em>product launch</em> (market release) until cumulative revenue covers the total development investment. Unlike BET, BEAR starts counting from launch, not project start.',
+  formula:'BEAR = Time from launch when cumulative net revenue &ge; total dev cost<br><small>Measured from product release date only</small>',
+  interpret:'<strong>BEAR &lt; BET</strong> always (since BEAR excludes dev time). A BEAR of 1&ndash;2 years is excellent. BEAR &gt; 3 years may signal market risk or pricing issues.',
+  hub:'ROI Hub shows BEAR alongside BET in the KPI cards and the BET &amp; BEAR chart. The gap between BET and BEAR represents your development timeline.'
+},
+payback:{
+  emoji:'&#x1F501;',title:'Payback Period',
+  def:'The payback period is the simplest capital budgeting metric: how long until cumulative <em>undiscounted</em> cash flows recoup the initial investment. It ignores the time value of money.',
+  formula:'Payback = Time when cumulative undiscounted cash flow &ge; 0',
+  interpret:'Quick to calculate, easy to understand, but <strong>ignores cash flows after payback</strong> and the time value of money. Best used as a supplementary metric alongside NPV and IRR.',
+  hub:'While ROI Hub focuses on NPV (discounted), you can infer approximate payback from the revenue trajectory. For time-value-adjusted payback, refer to BET.'
+},
+sensitivity:{
+  emoji:'&#x1F4C9;',title:'Sensitivity Analysis',
+  def:'Sensitivity analysis examines how changes in key input variables (ASP, volume, costs, discount rate) affect output metrics like NPV and IRR. It identifies which assumptions have the biggest impact on your investment decision.',
+  formula:'&Delta;NPV / &Delta;Input Variable = Sensitivity Coefficient<br><small>Typically tested at &plusmn;10%, &plusmn;20%, &plusmn;30% from base case</small>',
+  interpret:'High sensitivity = high risk. If a 10% drop in ASP flips NPV from positive to negative, pricing is a critical risk factor. Focus risk mitigation on the most sensitive variables.',
+  hub:'ROI Hub supports 3 built-in scenarios (Low, Most Likely, High) which serve as discrete sensitivity points. The scenario tabs let you toggle and compare NPV/IRR across assumptions. The Portfolio Dashboard aggregates this across all hubs.'
+},
+go_nogo:{
+  emoji:'&#x1F3AF;',title:'GO / NO-GO Decision Criteria',
+  def:'GO/NO-GO is a binary investment decision framework. A product gets a <strong>GO</strong> if it meets minimum financial hurdles, and <strong>NO-GO</strong> if it fails to justify the investment.',
+  formula:'<table><tr><th>Criteria</th><th>GO</th><th>NO-GO</th></tr><tr><td>NPV</td><td>&gt; $0</td><td>&le; $0</td></tr><tr><td>IRR</td><td>&gt; WACC</td><td>&le; WACC</td></tr><tr><td>BET</td><td>&le; Target</td><td>&gt; Target</td></tr></table>',
+  interpret:'A <strong>GO</strong> means the project is expected to create shareholder value above the cost of capital. A <strong>CAUTION</strong> may apply when metrics are borderline. NO-GO means the investment should be redirected.',
+  hub:'ROI Hub auto-assigns GO/NO-GO/CAUTION status based on computed NPV and IRR vs. the configured hurdle rate. The Portfolio Dashboard shows the status badge on each hub card for at-a-glance portfolio health.'
+},
+roi:{
+  emoji:'&#x1F4B8;',title:'Return on Investment (ROI)',
+  def:'ROI is a simple ratio measuring the net gain from an investment relative to its cost. It\'s expressed as a percentage and provides a quick profitability snapshot.',
+  formula:'ROI = [(Net Profit &minus; Investment Cost) / Investment Cost] &times; 100%',
+  interpret:'<strong>ROI &gt; 0%</strong> = profitable &nbsp;|&nbsp; <strong>ROI &gt; 100%</strong> = doubled your money. Note: ROI doesn\'t account for time &mdash; a 50% ROI over 1 year is much better than 50% over 10 years. Use IRR for time-adjusted returns.',
+  hub:'ROI Hub is named after this concept! The entire framework helps you compute and compare ROI across product investments, with NPV and IRR providing the time-adjusted view.'
+},
+discount:{
+  emoji:'&#x1F4B2;',title:'Discount Rate',
+  def:'The discount rate is the interest rate used to convert future cash flows into their present value. It reflects the <em>opportunity cost of capital</em> &mdash; what you could earn by investing elsewhere at similar risk.',
+  formula:'PV = FV / (1 + r)<sup>n</sup><br><small>where r = discount rate, n = number of periods</small>',
+  interpret:'Higher discount rate &rarr; future cash flows are worth less today &rarr; lower NPV. The discount rate is typically set equal to WACC for corporate projects.',
+  hub:'In ROI Hub, the discount rate (usually WACC) is configured in settings and applied to all NPV calculations. Changing the discount rate recalculates NPV and may flip GO/NO-GO status.'
+},
+cannibalize:{
+  emoji:'&#x1F372;',title:'Cannibalized Revenue',
+  def:'Cannibalized revenue is the revenue lost from existing products when a new product captures some of their market share. New products don\'t always create <em>new</em> demand &mdash; they sometimes redirect existing customers.',
+  formula:'Net New Revenue = Gross New Revenue &minus; Cannibalized Revenue<br><small>Cannibalization Rate = % of new product revenue that displaces existing products</small>',
+  interpret:'Always factor in cannibalization for product line extensions or upgrades. A 20% cannibalization rate means 20% of the new product\'s revenue would have gone to your existing products anyway.',
+  hub:'In ROI Hub\'s Revenue tab, you can model cannibalized revenue as a deduction from gross revenue projections. This ensures NPV reflects true incremental value, not just total revenue.'
+},
+burden:{
+  emoji:'&#x2696;&#xFE0F;',title:'Burden Rate',
+  def:'The burden rate is a multiplier applied to direct labor costs to account for overhead expenses like benefits, facilities, equipment, IT, and management. It converts base salary into fully-loaded cost.',
+  formula:'Fully Loaded Cost = Base Salary &times; (1 + Burden Rate)<br><small>Typical burden rates: 1.5x &ndash; 2.5x base salary</small>',
+  interpret:'A burden rate of 2.0x means an engineer with a $100K salary actually costs the company $200K. This is critical for accurate dev cost estimation.',
+  hub:'In ROI Hub\'s Dev Costs tab, the burden rate is applied to engineering headcount costs. Adjusting it affects total dev investment, which flows through to NPV, IRR, and BET calculations.'
+},
+asp:{
+  emoji:'&#x1F3F7;&#xFE0F;',title:'Average Selling Price (ASP)',
+  def:'ASP is the average price at which a product is sold across all customers and channels. It\'s a key revenue driver: <code>Revenue = Units Sold &times; ASP</code>.',
+  formula:'ASP = Total Revenue / Total Units Sold',
+  interpret:'ASP trends matter: declining ASP (price erosion) is common in tech. Model ASP decline over time in your projections. Different scenarios (Low/Most Likely/High) should use different ASP assumptions.',
+  hub:'In ROI Hub\'s Revenue tab, ASP is a configurable input per scenario. Each scenario (Low, Most Likely, High) can have its own ASP and COGS defaults. Changes automatically recalculate revenue, margins, NPV, and IRR.'
+},
+cogs:{
+  emoji:'&#x1F3ED;',title:'Cost of Goods Sold (COGS)',
+  def:'COGS represents the direct costs of producing goods sold by the company &mdash; materials, direct labor, manufacturing overhead. It excludes R&amp;D, sales, and administrative expenses.',
+  formula:'Gross Profit = Revenue &minus; COGS<br>Gross Margin = (Revenue &minus; COGS) / Revenue &times; 100%',
+  interpret:'Lower COGS = higher margins = more profit per unit. Track COGS as a percentage of ASP. In semiconductor ATE, COGS typically runs 40&ndash;60% of ASP.',
+  hub:'In ROI Hub\'s Revenue tab, COGS is set per unit alongside ASP. Different scenarios can have different COGS assumptions. The P&amp;L tab shows how COGS flows through to gross profit and operating margin.'
+},
+gross_margin:{
+  emoji:'&#x1F4B5;',title:'Gross Margin',
+  def:'Gross margin is the percentage of revenue remaining after subtracting COGS. It measures production efficiency and pricing power before operating expenses.',
+  formula:'Gross Margin % = [(ASP &minus; COGS) / ASP] &times; 100%<br><small>or: Gross Profit / Revenue &times; 100%</small>',
+  interpret:'<strong>&gt; 60%</strong> = excellent (software-like) &nbsp;|&nbsp; <strong>40&ndash;60%</strong> = healthy hardware &nbsp;|&nbsp; <strong>&lt; 40%</strong> = commodity risk. Gross margin funds R&amp;D, sales, and profit.',
+  hub:'ROI Hub auto-computes gross margin from your ASP and COGS inputs. It\'s visible in the P&amp;L tab and feeds into the NPV calculation. Higher gross margins improve NPV and can flip a NO-GO to GO.'
+},
+pl:{
+  emoji:'&#x1F4CA;',title:'Profit &amp; Loss Statement (P&amp;L)',
+  def:'A P&amp;L statement summarizes revenues, costs, and expenses over a period to show whether a product generates profit or loss. It\'s the financial scorecard of your investment.',
+  formula:'<table><tr><th>Line Item</th><th>Formula</th></tr><tr><td>Revenue</td><td>Units &times; ASP</td></tr><tr><td>&minus; COGS</td><td>Units &times; COGS/unit</td></tr><tr><td>= Gross Profit</td><td>Revenue &minus; COGS</td></tr><tr><td>&minus; Dev Costs</td><td>Engineering + NPI</td></tr><tr><td>= Operating Profit</td><td>Gross Profit &minus; Dev Costs</td></tr></table>',
+  interpret:'Track P&amp;L year-over-year. Initial years show losses (dev investment), later years show profit as revenue ramps. Cumulative P&amp;L turning positive = break-even.',
+  hub:'ROI Hub\'s P&amp;L tab shows the full profit and loss projection per year. It pulls data from Revenue and Dev Costs tabs. The Dashboard aggregates P&amp;L into NPV and IRR.'
+},
+npi:{
+  emoji:'&#x1F680;',title:'New Product Introduction (NPI) Cost',
+  def:'NPI cost covers expenses for transitioning a product from development to manufacturing &mdash; tooling, test development, qualification, pilot runs, and launch activities.',
+  formula:'NPI = Eng Subtotal &times; NPI Rate (typically 10%)<br><small>NPI Rate varies by product complexity and manufacturing readiness</small>',
+  interpret:'NPI is often overlooked but can be 5&ndash;15% of total engineering costs. Include it for accurate total investment calculation.',
+  hub:'In ROI Hub\'s Dev Costs tab, NPI is calculated as Eng Subtotal &times; 10% by default. It\'s added to total dev costs and impacts NPV, IRR, and BET.'
+},
+eng_subtotal:{
+  emoji:'&#x1F477;',title:'Engineering Subtotal (Eng Subtotal)',
+  def:'Eng Subtotal is the total fully-loaded cost of all engineering resources allocated to a product development project, including hardware, software, firmware, test, and systems engineering.',
+  formula:'Eng Subtotal = &sum; (Headcount &times; Fully Loaded Cost &times; Duration)<br><small>Fully Loaded Cost = Base Salary &times; (1 + Burden Rate)</small>',
+  interpret:'Eng Subtotal is the largest component of dev costs. It drives BET and is the denominator for BEAR. Reducing headcount or duration directly improves project economics.',
+  hub:'In ROI Hub\'s Dev Costs tab, Eng Subtotal aggregates all engineering cost rows (Eng Total Cost). NPI is then calculated as 10% of this subtotal. Together they form the total development investment.'
+}
+};
+
 function aiReply(q){
   var ql=q.toLowerCase(),keys=Object.keys(hubData);
+  // === KNOWLEDGE BASE LOOKUP ===
+  var kbTriggers=['what','explain','define','how','mean','tell','describe','understand','concept','help'];
+  var isKBQuery=false;
+  for(var ki=0;ki<kbTriggers.length;ki++){if(ql.indexOf(kbTriggers[ki])>=0){isKBQuery=true;break}}
+  if(!isKBQuery&&ql.indexOf('?')>=0)isKBQuery=true;
+  var kbMap={
+    'net present value':KB.npv,'npv':KB.npv,
+    'internal rate of return':KB.irr,'internal rate':KB.irr,'irr':KB.irr,
+    'weighted average cost':KB.wacc,'cost of capital':KB.wacc,'wacc':KB.wacc,
+    'break-even time':KB.bet,'break even time':KB.bet,'breakeven time':KB.bet,
+    'break-even after':KB.bear,'break even after':KB.bear,'breakeven after':KB.bear,
+    'payback period':KB.payback,'payback':KB.payback,'pay back':KB.payback,
+    'sensitivity analysis':KB.sensitivity,'sensitivity':KB.sensitivity,
+    'go/no-go':KB.go_nogo,'go nogo':KB.go_nogo,'go no go':KB.go_nogo,'go-nogo':KB.go_nogo,'nogo criteria':KB.go_nogo,'go criteria':KB.go_nogo,'decision criteria':KB.go_nogo,
+    'return on investment':KB.roi,'roi':KB.roi,
+    'discount rate':KB.discount,
+    'cannibalization':KB.cannibalize,'cannibalize':KB.cannibalize,'cannibalized':KB.cannibalize,
+    'burden rate':KB.burden,'burden':KB.burden,
+    'average selling price':KB.asp,'selling price':KB.asp,'asp':KB.asp,
+    'cost of goods sold':KB.cogs,'cost of goods':KB.cogs,'cogs':KB.cogs,
+    'gross margin':KB.gross_margin,'margin':KB.gross_margin,
+    'profit and loss':KB.pl,'profit & loss':KB.pl,'profit loss':KB.pl,'p&l':KB.pl,
+    'new product introduction':KB.npi,'npi':KB.npi,
+    'engineering subtotal':KB.eng_subtotal,'eng subtotal':KB.eng_subtotal,'eng total':KB.eng_subtotal
+  };
+  // Check for BET vs BEAR comparison first
+  if((ql.indexOf('bet')>=0&&ql.indexOf('bear')>=0)||(ql.indexOf('break')>=0&&ql.indexOf('even')>=0&&(ql.indexOf('vs')>=0||ql.indexOf('compar')>=0))){
+    return '<div class="kb-title">&#x23F1;&#xFE0F; BET vs BEAR Comparison</div>'+
+      '<table><tr><th>Metric</th><th>BET (Break-Even Time)</th><th>BEAR (Break-Even After Release)</th></tr>'+
+      '<tr><td><strong>Starts From</strong></td><td>Project start (includes dev)</td><td>Product launch date</td></tr>'+
+      '<tr><td><strong>Measures</strong></td><td>Total time to recoup investment</td><td>Post-launch time to recoup</td></tr>'+
+      '<tr><td><strong>Always</strong></td><td>BET &ge; BEAR</td><td>BEAR &le; BET</td></tr>'+
+      '<tr><td><strong>Gap = </strong></td><td colspan="2">Development timeline duration</td></tr></table>'+
+      '<div class="kb-section"><strong>&#x1F4A1; Example:</strong> If dev takes 2 years and post-launch payback is 1.5 years, then BET = 3.5 years and BEAR = 1.5 years.</div>'+
+      '<div class="kb-tip"><strong>&#x1F4E6; In ROI Hub:</strong> Both are shown in KPI cards and the BET &amp; BEAR chart. A small gap between BET and BEAR means short dev cycles. A large gap means heavy upfront R&amp;D investment.</div>';
+  }
+  if(isKBQuery){
+    var matched=null;
+    var kbKeys=Object.keys(kbMap);
+    kbKeys.sort(function(a,b){return b.length-a.length});
+    for(var mi=0;mi<kbKeys.length;mi++){
+      if(ql.indexOf(kbKeys[mi])>=0){matched=kbMap[kbKeys[mi]];break}
+    }
+    if(matched){
+      return '<div class="kb-title">'+matched.emoji+' '+matched.title+'</div>'+
+        '<div class="kb-section">'+matched.def+'</div>'+
+        '<div class="kb-formula">'+matched.formula+'</div>'+
+        '<div class="kb-section"><strong>&#x1F50D; How to Interpret:</strong><br>'+matched.interpret+'</div>'+
+        '<div class="kb-tip"><strong>&#x1F4E6; In ROI Hub:</strong> '+matched.hub+'</div>';
+    }
+  }
+  // === END KNOWLEDGE BASE LOOKUP ===
   var stats=[];
   for(var i=0;i<keys.length;i++){
     var h=hubData[keys[i]];if(!h.snap)continue;
@@ -467,7 +682,7 @@ function aiReply(q){
     keys.forEach(function(k){var h3=hubData[k];info+='<br><strong>'+esc(h3.reg.hub_name)+'</strong> ('+k+')<br>';if(h3.snap){info+='Cols: '+Object.keys(h3.snap).join(', ')+'<br>';var cm=h3.snap.metadata?h3.snap.metadata.computed_metrics:null;info+='computed_metrics: '+(cm?'YES - '+Object.keys(cm).join(', '):'NO')+'<br>'}else info+='No snapshot<br>'});
     return info;
   }
-  return '&#x1F916; <strong>'+SNAME[scenario]+'</strong>: '+stats.length+' hubs | NPV '+fmtUSD(tN)+' | IRR '+fmtIRR(aI)+'<br><br><em>Try: "portfolio summary", "compare scenarios", "top performer", "risk analysis", "debug"</em>';
+  return '&#x1F916; <strong>'+SNAME[scenario]+'</strong>: '+stats.length+' hubs | NPV '+fmtUSD(tN)+' | IRR '+fmtIRR(aI)+'<br><br><em>Try: "portfolio summary", "compare scenarios", "top performer", "risk analysis", "debug"</em><br><br>&#x1F4DA; <em>Knowledge Base: Ask "What is NPV?", "Explain IRR", "BET vs BEAR", "Gross Margin", and 15+ more financial concepts!</em>';
 }
 
 function esc(s){if(!s)return'';var d=document.createElement('div');d.appendChild(document.createTextNode(s));return d.innerHTML}
